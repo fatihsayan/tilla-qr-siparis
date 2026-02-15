@@ -427,16 +427,19 @@
         }
 
         function urunKarti(urun) {
-            return `
-                <div class="item">
-                    <div class="emoji-kutu">${urun.emoji}</div>
-                    <h3>${urun.isim}</h3>
-                    <p>${urun.aciklama || ''}</p>
-                    <div class="fiyat">${urun.fiyat} TL</div>
-                    <button onclick="sepeteEkle(${urun.id})">Sepete Ekle</button>
-                </div>
-            `;
-        }
+    return `
+        <div class="item">
+            <img src="${urun.resim}" alt="${urun.isim}" class="urun-resim" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                 style="display: block;">
+            <div class="emoji-kutu" style="display: none;">${urun.emoji}</div>
+            <h3>${urun.isim}</h3>
+            <p>${urun.aciklama || ''}</p>
+            <div class="fiyat">${urun.fiyat} TL</div>
+            <button onclick="sepeteEkle(${urun.id})">Sepete Ekle</button>
+        </div>
+    `;
+}
 
         window.sepeteEkle = function(id) {
             const urun = menu.find(u => u.id === id);
