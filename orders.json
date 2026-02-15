@@ -1,0 +1,146 @@
+[
+  {
+    "masa": "1",
+    "urunler": [
+      {
+        "urun": "Kır Pidesi",
+        "fiyat": 80
+      }
+    ],
+    "tarih": "2026-02-15T10:02:20.877Z"
+  },
+  {
+    "masa": "1",
+    "urunler": [],
+    "tarih": "2026-02-15T10:05:36.880Z"
+  },
+  {
+    "masa": "1",
+    "urunler": [],
+    "tarih": "2026-02-15T10:05:39.506Z"
+  },
+  {
+    "masa": "1",
+    "urunler": [
+      {
+        "urun": "Kır Pidesi",
+        "fiyat": 80
+      },
+      {
+        "urun": "Sarıyer Böreği",
+        "fiyat": 70
+      },
+      {
+        "urun": "Gaziantep Baklavası",
+        "fiyat": 120
+      }
+    ],
+    "tarih": "2026-02-15T10:08:55.401Z"
+  },
+  {
+    "masa": "1",
+    "urunler": [
+      {
+        "urun": "Şekerpare",
+        "fiyat": 60
+      },
+      {
+        "urun": "Tulumba Tatlısı",
+        "fiyat": 65
+      },
+      {
+        "urun": "Baton Pasta",
+        "fiyat": 150
+      }
+    ],
+    "tarih": "2026-02-15T10:09:01.167Z"
+  },
+  {
+    "masa": null,
+    "urunler": [
+      {
+        "urun": "Gaziantep Baklavası",
+        "fiyat": 120
+      },
+      {
+        "urun": "Şekerpare",
+        "fiyat": 60
+      },
+      {
+        "urun": "Tulumba Tatlısı",
+        "fiyat": 65
+      },
+      {
+        "urun": "Baton Pasta",
+        "fiyat": 150
+      },
+      {
+        "urun": "Ekler Pasta",
+        "fiyat": 140
+      },
+      {
+        "urun": "Gaziantep Baklavası",
+        "fiyat": 120
+      },
+      {
+        "urun": "Sarıyer Böreği",
+        "fiyat": 70
+      },
+      {
+        "urun": "Kır Pidesi",
+        "fiyat": 80
+      }
+    ],
+    "tarih": "2026-02-15T10:25:32.348Z"
+  },
+  {
+    "masa": null,
+    "urunler": [
+      {
+        "urun": "Sarıyer Böreği",
+        "fiyat": 70
+      },
+      {
+        "urun": "Sarıyer Böreği",
+        "fiyat": 70
+      },
+      {
+        "urun": "Gaziantep Baklavası",
+        "fiyat": 120
+      }
+    ],
+    "tarih": "2026-02-15T10:29:17.526Z"
+  },
+  {
+    "masa": null,
+    "urunler": [
+      {
+        "urun": "Kır Pidesi",
+        "fiyat": 80
+      },
+      {
+        "urun": "Sarıyer Böreği",
+        "fiyat": 70
+      }
+    ],
+    "tarih": "2026-02-15T10:34:32.424Z"
+  },
+  {
+    "masa": null,
+    "urunler": [
+      {
+        "urun": "Şekerpare",
+        "fiyat": 60
+      },
+      {
+        "urun": "Gaziantep Baklavası",
+        "fiyat": 120
+      },
+      {
+        "urun": "Sarıyer Böreği",
+        "fiyat": 70
+      }
+    ],
+    "tarih": "2026-02-15T11:22:37.638Z"
+  }
+]

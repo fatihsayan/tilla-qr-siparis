@@ -1,0 +1,44 @@
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #fff8f0;
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.item {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    background: white;
+}
+
+button {
+    padding: 10px;
+    background: brown;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.item {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.urun-resim {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}

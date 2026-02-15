@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "isim": "Kır Pidesi",
+    "fiyat": 80,
+    "resim": "images/kirpidesi.jpg"
+  },
+  {
+    "id": 2,
+    "isim": "Sarıyer Böreği",
+    "fiyat": 70,
+    "resim": "images/sariyer.jpg"
+  },
+  {
+    "id": 3,
+    "isim": "Gaziantep Baklavası",
+    "fiyat": 120,
+    "resim": "images/baklava.jpg"
+  },
+  {
+    "id": 4,
+    "isim": "Şekerpare",
+    "fiyat": 60,
+    "resim": "images/sekerpare.jpg"
+  },
+  {
+    "id": 5,
+    "isim": "Tulumba Tatlısı",
+    "fiyat": 65,
+    "resim": "images/tulumba.jpg"
+  },
+  {
+    "id": 6,
+    "isim": "Baton Pasta",
+    "fiyat": 150,
+    "resim": "images/baton.jpg"
+  },
+  {
+    "id": 7,
+    "isim": "Ekler Pasta",
+    "fiyat": 140,
+    "resim": "images/ekler.jpg"
+  }
+]

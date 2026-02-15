@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tilla Pastanesi - QR Menü</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Tilla Pastanesi</h1>
+        <h2>Masa No: <span id="masaNo"></span></h2>
+    </header>
+
+    <main>
+
+        <section>
+            <h2>Menü</h2>
+            <div class="menu" id="menu"></div>
+        </section>
+
+        <section class="sepet-alani">
+            <h2>Sepet</h2>
+            <ul id="sepet"></ul>
+            <button onclick="siparisGonder()" class="siparis-btn">
+                Siparişi Gönder
+            </button>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
