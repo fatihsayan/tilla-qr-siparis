@@ -16,9 +16,9 @@
         button { background: #d2691e; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-size: 16px; }
         .yok { text-align: center; color: #666; padding: 50px; }
     </style>
-    <!-- SES İÇİN -->
+    <!-- SES İÇİN: Buraya istediğin ses dosyasının linkini ekleyeceksin -->
     <audio id="siparisSesi" preload="auto" style="display: none;">
-        <source src="/ses/bildirimsesi.mp3" type="audio/mpeg">
+        <source src="" type="audio/mpeg">
     </audio>
 </head>
 <body>
@@ -31,63 +31,28 @@
 
         function siparisleriGetir() {
             fetch('/admin/siparisler')
-                .then(res => res.text())  // Önce text olarak al
-                .then(text => {
-                    console.log('Ham veri:', text);
-                    
-                    // Veriyi düzenle ve JSON'a çevir
-                    let siparisler = [];
-                    try {
-                        // Önce normal parse dene
-                        siparisler = JSON.parse(text);
-                    } catch (e) {
-                        console.log('JSON parse hatası, düzenleniyor...');
-                        try {
-                            // Bozuk JSON'u düzeltmeye çalış
-                            const duzeltilmis = text
-                                .replace(/\}\s*\{/g, '},{')  // Arka arkaya objeleri ayır
-                                .replace(/\}\s*\]/g, '}]')    // Kapanışları düzelt
-                                .replace(/\[\s*\{/g, '[{')     // Açılışları düzelt
-                                .replace(/\}\s*\{/g, '},{');   // Tekrar dene
-                            
-                            // Başına [ ve sonuna ] ekle yoksa
-                            if (!duzeltilmis.startsWith('[')) {
-                                siparisler = JSON.parse('[' + duzeltilmis + ']');
-                            } else {
-                                siparisler = JSON.parse(duzeltilmis);
-                            }
-                        } catch (e2) {
-                            console.log('Düzeltme de başarısız:', e2);
-                            siparisler = [];
-                        }
-                    }
-
-                    console.log('Düzenlenmiş siparişler:', siparisler);
-                    
-                    // YENİ SİPARİŞ SESİ
+                .then(res => res.json())
+                .then(siparisler => {
+                    // YENİ SİPARİŞ KONTROLÜ VE SES
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
-                        document.getElementById('siparisSesi').play().catch(e => console.log('Ses hatası:', e));
+                        // SES ÇAL
+                        document.getElementById('siparisSesi').play();
                     }
                     oncekiSiparisSayisi = siparisler.length;
 
                     // SİPARİŞLERİ GÖSTER
                     const container = document.getElementById('siparisler');
                     
-                    if (!siparisler || siparisler.length === 0) {
+                    if (siparisler.length === 0) {
                         container.innerHTML = '<div class="yok">Henüz sipariş yok</div>';
                         return;
                     }
 
                     let html = '';
-                    
                     siparisler.reverse().forEach(sip => {
-                        // Masa numarası
                         let masaNo = sip.masa || 'Belirtilmemiş';
-                        
-                        // Tarih
                         let tarih = sip.tarih || '';
                         
-                        // Ürünler
                         let urunlerHtml = '';
                         let toplam = 0;
                         
@@ -114,23 +79,20 @@
                                     <span class="masa">Masa ${masaNo}</span>
                                     <span class="zaman">${tarih}</span>
                                 </div>
-                                ${urunlerHtml || '<div class="urun">Ürün yok</div>'}
+                                ${urunlerHtml}
                                 <div class="toplam">Toplam: ${toplam} TL</div>
                             </div>
                         `;
                     });
                     
                     container.innerHTML = html;
-                })
-                .catch(err => {
-                    console.error('Hata:', err);
-                    document.getElementById('siparisler').innerHTML = 
-                        '<div class="yok">Hata: ' + err.message + '</div>';
                 });
         }
-        
+
+        // Sayfa yüklenince çalıştır
         siparisleriGetir();
-        setInterval(siparisleriGetir, 3000);
+        // 5 saniyede bir yenile
+        setInterval(siparisleriGetir, 5000);
     </script>
 </body>
 </html>
