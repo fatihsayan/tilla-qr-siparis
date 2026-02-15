@@ -2,35 +2,612 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Tilla Pastanesi - QR Menü</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #fff8f0;
+            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #d2691e, #b85e1a);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        header h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 50px;
+        }
+
+        #masaNo {
+            font-weight: bold;
+            background: white;
+            color: #d2691e;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-left: 5px;
+        }
+
+        /* KATEGORİ BAŞLIKLARI */
+        .kategori-baslik {
+            grid-column: 1/-1;
+            margin: 20px 0 15px 0;
+        }
+        
+        .kategori-baslik h3 {
+            color: #d2691e;
+            border-bottom: 3px solid #d2691e;
+            padding-bottom: 8px;
+            font-size: 1.4rem;
+            display: inline-block;
+        }
+
+        /* MENÜ GRID */
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* MENÜ ÖĞESİ */
+        .item {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #f0d9b5;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item:active {
+            transform: scale(0.98);
+        }
+
+        .emoji-kutu {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #f8e0c0;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 2px solid #d2691e;
+        }
+
+        .item h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .item p {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 10px;
+            flex-grow: 1;
+            line-height: 1.3;
+        }
+
+        .item .fiyat {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #d2691e;
+            margin-bottom: 10px;
+        }
+
+        .item button {
+            background: #d2691e;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .item button:hover {
+            background: #b85e1a;
+        }
+
+        /* SEPET ALANI */
+        .sepet-alani {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            transform: translateY(calc(100% - 70px));
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            border-top: 3px solid #d2691e;
+        }
+
+        .sepet-alani.acik {
+            transform: translateY(0);
+        }
+
+        .sepet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .sepet-header h2 {
+            font-size: 1.3rem;
+            margin: 0;
+            color: #d2691e;
+        }
+
+        .sepet-toggle {
+            background: #d2691e;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        #sepet {
+            list-style: none;
+            margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #sepet li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f0d9b5;
+            font-size: 0.95rem;
+        }
+
+        .sepet-urun-adet {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sepet-urun-adet button {
+            background: #f0d9b5;
+            color: #d2691e;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .sepet-urun-adet span {
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .sepet-toplam {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #d2691e;
+            text-align: right;
+            margin-bottom: 15px;
+            padding-top: 10px;
+            border-top: 2px solid #f0d9b5;
+        }
+
+        .siparis-btn {
+            background: #d2691e;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .siparis-btn:hover {
+            background: #b85e1a;
+        }
+
+        .siparis-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                padding-bottom: 70px;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .menu {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .item {
+                padding: 10px;
+            }
+
+            .item h3 {
+                font-size: 1rem;
+            }
+
+            .item .fiyat {
+                font-size: 1rem;
+            }
+            
+            .emoji-kutu {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 350px) {
+            .menu {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* TOAST BİLDİRİM */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .toast.goster {
+            display: block;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { bottom: 50px; opacity: 0; }
+            to { bottom: 100px; opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
     <header>
-        <h1>Tilla Pastanesi</h1>
-        <h2>Masa No: <span id="masaNo"></span></h2>
+        <h1>🍰 Tilla Pastanesi</h1>
+        <h2>Masa No: <span id="masaNo">Yükleniyor...</span></h2>
     </header>
 
     <main>
-
         <section>
-            <h2>Menü</h2>
-            <div class="menu" id="menu"></div>
+            <div class="menu" id="menu">
+                <div style="text-align: center; padding: 50px; grid-column: 1/-1;">Menü yükleniyor...</div>
+            </div>
         </section>
-
-        <section class="sepet-alani">
-            <h2>Sepet</h2>
-            <ul id="sepet"></ul>
-            <button onclick="siparisGonder()" class="siparis-btn">
-                Siparişi Gönder
-            </button>
-        </section>
-
     </main>
 
-    <script src="script.js"></script>
+    <!-- SEPET ALANI -->
+    <div class="sepet-alani" id="sepetAlan">
+        <div class="sepet-header" onclick="sepetToggle()">
+            <h2>🛒 Sepetim</h2>
+            <div class="sepet-toggle" id="sepetToggle">▲</div>
+        </div>
+        
+        <ul id="sepet">
+            <li style="text-align: center; color: #666; list-style: none;">Sepetiniz boş</li>
+        </ul>
+        
+        <div class="sepet-toplam" id="sepetToplam">Toplam: 0 TL</div>
+        
+        <button onclick="siparisGonder()" class="siparis-btn" id="siparisBtn">
+            Siparişi Gönder
+        </button>
+    </div>
+
+    <!-- BİLDİRİM -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ========== MENÜ VERİSİ - KATEGORİLİ ==========
+        const menu = [
+            // 🍰 TATLILAR
+            { id: 1, isim: "Şekerpare", fiyat: 60, kategori: "tatli", aciklama: "Şerbetli tatlı" },
+            { id: 2, isim: "Gaziantep Baklavası", fiyat: 120, kategori: "tatli", aciklama: "Antep fıstıklı" },
+            { id: 3, isim: "Sarıyer Böreği", fiyat: 70, kategori: "tatli", aciklama: "Tahinli" },
+            { id: 4, isim: "Tulumba", fiyat: 50, kategori: "tatli", aciklama: "Kızartma tatlı" },
+            { id: 5, isim: "Ekler", fiyat: 80, kategori: "tatli", aciklama: "Kremalı" },
+            { id: 6, isim: "Baton", fiyat: 90, kategori: "tatli", aciklama: "Çikolata kaplı" },
+            { id: 7, isim: "Kırpidöşi", fiyat: 75, kategori: "tatli", aciklama: "Hindistan cevizli" },
+            { id: 8, isim: "Dubai Çikolatası", fiyat: 150, kategori: "tatli", aciklama: "Özel Dubai çikolatası" },
+            { id: 9, isim: "Kurabiye", fiyat: 30, kategori: "tatli", aciklama: "Tereyağlı kurabiye" },
+            { id: 10, isim: "Kek", fiyat: 40, kategori: "tatli", aciklama: "Ev yapımı kek" },
+
+            // 🥐 YİYECEKLER
+            { id: 11, isim: "Simit", fiyat: 25, kategori: "yiyecek", aciklama: "Susamlı simit" },
+            { id: 12, isim: "Poğaça", fiyat: 20, kategori: "yiyecek", aciklama: "Peynirli poğaça" },
+            { id: 13, isim: "Açma", fiyat: 20, kategori: "yiyecek", aciklama: "Yumuşacık açma" },
+            { id: 14, isim: "Çubuk", fiyat: 15, kategori: "yiyecek", aciklama: "Tuzlu çubuk kraker" },
+
+            // 🥤 İÇECEKLER
+            { id: 21, isim: "Çay", fiyat: 15, kategori: "icecek", aciklama: "Demlik çay" },
+            { id: 22, isim: "Kola", fiyat: 30, kategori: "icecek", aciklama: "Soğuk kola" },
+            { id: 23, isim: "Meyve Suyu", fiyat: 25, kategori: "icecek", aciklama: "Şeftali/Portakal/Kayısı" },
+            { id: 24, isim: "Ayran", fiyat: 20, kategori: "icecek", aciklama: "Soğuk ayran" },
+            { id: 25, isim: "Limonata", fiyat: 35, kategori: "icecek", aciklama: "Taze sıkım limonata" }
+        ];
+
+        // ========== DEĞİŞKENLER ==========
+        let sepet = [];
+        let sepetAcik = false;
+
+        // URL'den masa numarasını al
+        const urlParams = new URLSearchParams(window.location.search);
+        const masaNo = urlParams.get('masa') || '1';
+        document.getElementById('masaNo').textContent = masaNo;
+
+        // ========== MENÜYÜ GÖSTER (KATEGORİLİ) ==========
+        function menuyuGoster() {
+            const menuDiv = document.getElementById('menu');
+            
+            if (!menu || menu.length === 0) {
+                menuDiv.innerHTML = '<div style="text-align: center; padding: 50px; grid-column: 1/-1;">Menü bulunamadı</div>';
+                return;
+            }
+
+            // Kategorilere ayır
+            const tatlılar = menu.filter(u => u.kategori === 'tatli');
+            const yiyecekler = menu.filter(u => u.kategori === 'yiyecek');
+            const icecekler = menu.filter(u => u.kategori === 'icecek');
+
+            let html = '';
+
+            // 🍰 TATLILAR
+            if (tatlılar.length > 0) {
+                html += '<div class="kategori-baslik"><h3>🍰 Tatlılar</h3></div>';
+                tatlılar.forEach(urun => {
+                    html += urunKarti(urun, '🍰');
+                });
+            }
+
+            // 🥐 YİYECEKLER
+            if (yiyecekler.length > 0) {
+                html += '<div class="kategori-baslik"><h3>🥐 Yiyecekler</h3></div>';
+                yiyecekler.forEach(urun => {
+                    html += urunKarti(urun, '🥐');
+                });
+            }
+
+            // 🥤 İÇECEKLER
+            if (icecekler.length > 0) {
+                html += '<div class="kategori-baslik"><h3>🥤 İçecekler</h3></div>';
+                icecekler.forEach(urun => {
+                    html += urunKarti(urun, '🥤');
+                });
+            }
+            
+            menuDiv.innerHTML = html;
+        }
+
+        // Ürün kartı oluştur - RESİMSİZ EMOJİLİ VERSİYON
+        function urunKarti(urun, emoji) {
+            return `
+                <div class="item">
+                    <div class="emoji-kutu">
+                        ${emoji}
+                    </div>
+                    <h3>${urun.isim}</h3>
+                    <p>${urun.aciklama || ''}</p>
+                    <div class="fiyat">${urun.fiyat} TL</div>
+                    <button onclick="sepeteEkle(${urun.id})">
+                        Sepete Ekle
+                    </button>
+                </div>
+            `;
+        }
+
+        // ========== SEPET İŞLEMLERİ ==========
+        window.sepeteEkle = function(id) {
+            const urun = menu.find(u => u.id === id);
+            const sepetteki = sepet.find(u => u.id === id);
+            
+            if (sepetteki) {
+                sepetteki.adet = (sepetteki.adet || 1) + 1;
+            } else {
+                sepet.push({ ...urun, adet: 1 });
+            }
+            
+            sepetGuncelle();
+            toastGoster(`${urun.isim} sepete eklendi`);
+            
+            if (!sepetAcik) {
+                sepetToggle();
+            }
+        };
+
+        window.sepetMiktarDegistir = function(id, islem) {
+            const index = sepet.findIndex(u => u.id === id);
+            if (index === -1) return;
+            
+            if (islem === 'artir') {
+                sepet[index].adet += 1;
+            } else if (islem === 'azalt') {
+                sepet[index].adet -= 1;
+                if (sepet[index].adet <= 0) {
+                    sepet.splice(index, 1);
+                }
+            }
+            
+            sepetGuncelle();
+        };
+
+        function sepetGuncelle() {
+            const sepetListe = document.getElementById('sepet');
+            const toplamSpan = document.getElementById('sepetToplam');
+            
+            if (sepet.length === 0) {
+                sepetListe.innerHTML = '<li style="text-align: center; color: #666; list-style: none;">Sepetiniz boş</li>';
+                toplamSpan.innerHTML = 'Toplam: 0 TL';
+                document.getElementById('siparisBtn').disabled = true;
+                return;
+            }
+
+            let html = '';
+            let toplam = 0;
+            
+            sepet.forEach(urun => {
+                const araToplam = urun.fiyat * urun.adet;
+                toplam += araToplam;
+                
+                html += `
+                    <li>
+                        <div style="flex:1">
+                            <div><strong>${urun.isim}</strong></div>
+                            <div style="font-size:0.8rem; color:#666;">${urun.fiyat} TL x ${urun.adet} = ${araToplam} TL</div>
+                        </div>
+                        <div class="sepet-urun-adet">
+                            <button onclick="sepetMiktarDegistir(${urun.id}, 'azalt')">−</button>
+                            <span>${urun.adet}</span>
+                            <button onclick="sepetMiktarDegistir(${urun.id}, 'artir')">+</button>
+                        </div>
+                    </li>
+                `;
+            });
+            
+            sepetListe.innerHTML = html;
+            toplamSpan.innerHTML = `Toplam: ${toplam} TL`;
+            document.getElementById('siparisBtn').disabled = false;
+        }
+
+        // ========== SİPARİŞ GÖNDER ==========
+        window.siparisGonder = function() {
+            if (sepet.length === 0) {
+                toastGoster('Sepetiniz boş!');
+                return;
+            }
+
+            const siparis = {
+                masa: masaNo,
+                urunler: sepet.map(u => ({
+                    urun: u.isim,
+                    fiyat: u.fiyat,
+                    adet: u.adet
+                })),
+                toplam: sepet.reduce((t, u) => t + (u.fiyat * u.adet), 0),
+                tarih: new Date().toISOString()
+            };
+
+            fetch('/siparis', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(siparis)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.basarili) {
+                    toastGoster('✅ Siparişiniz alındı! Afiyet olsun.');
+                    sepet = [];
+                    sepetGuncelle();
+                    if (sepetAcik) {
+                        sepetToggle();
+                    }
+                } else {
+                    toastGoster('❌ Sipariş gönderilemedi!');
+                }
+            })
+            .catch(err => {
+                toastGoster('❌ Hata oluştu!');
+                console.error(err);
+            });
+        };
+
+        // ========== SEPET AÇ/KAPA ==========
+        window.sepetToggle = function() {
+            const sepetAlan = document.getElementById('sepetAlan');
+            const sepetToggleBtn = document.getElementById('sepetToggle');
+            
+            sepetAcik = !sepetAcik;
+            
+            if (sepetAcik) {
+                sepetAlan.classList.add('acik');
+                sepetToggleBtn.innerHTML = '▼';
+            } else {
+                sepetAlan.classList.remove('acik');
+                sepetToggleBtn.innerHTML = '▲';
+            }
+        };
+
+        // ========== TOAST BİLDİRİM ==========
+        function toastGoster(mesaj) {
+            const toast = document.getElementById('toast');
+            toast.textContent = mesaj;
+            toast.classList.add('goster');
+            
+            setTimeout(() => {
+                toast.classList.remove('goster');
+            }, 2000);
+        }
+
+        // ========== BAŞLAT ==========
+        menuyuGoster();
+    </script>
 
 </body>
 </html>
