@@ -3,54 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tilla Pastanesi - Admin Paneli</title>
+    <title>Tilla Pastanesi - Sipariş Paneli</title>
     <style>
-        /* CSS kodların aynen burada olacak */
+        body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 20px; }
+        h1 { color: #d2691e; }
+        .siparis { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #d2691e; }
+        .siparis-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .masa { background: #d2691e; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .urun { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #eee; }
+        .toplam { margin-top: 10px; font-weight: bold; color: #d2691e; font-size: 1.2em; }
+        .zaman { color: #666; font-size: 0.9em; }
+        button { background: #d2691e; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-size: 16px; }
+        .yok { text-align: center; color: #666; padding: 50px; }
     </style>
-    <!-- Basit ses dosyası -->
-    <audio id="notificationSound" preload="auto" style="display: none;">
-        <source src="https://www.soundjay.com/misc/sounds/notification-bell-1.mp3" type="audio/mpeg">
+    <!-- SES İÇİN: Buraya istediğin ses dosyasının linkini ekleyeceksin -->
+    <audio id="siparisSesi" preload="auto" style="display: none;">
+        <source src="bildirimsesi.mp3" type="audio/mpeg">
     </audio>
 </head>
 <body>
-    <div class="header">
-        <h1>📋 Tilla Pastanesi - Sipariş Paneli</h1>
-        <button class="yenile-btn" onclick="siparisleriGetir()">🔄 Yenile</button>
-    </div>
-
-    <div id="siparisler">
-        <div class="yok">Yükleniyor...</div>
-    </div>
+    <h1>📋 Tilla Pastanesi - Sipariş Paneli</h1>
+    <button onclick="siparisleriGetir()">🔄 Yenile</button>
+    <div id="siparisler">Yükleniyor...</div>
 
     <script>
-        // Bildirim izni iste
-        if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-            Notification.requestPermission();
-        }
-
         let oncekiSiparisSayisi = 0;
 
         function siparisleriGetir() {
             fetch('/admin/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
-                    // Yeni sipariş kontrolü
+                    // YENİ SİPARİŞ KONTROLÜ VE SES
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
-                        // Ses çal
-                        const ses = document.getElementById('notificationSound');
-                        ses.play().catch(e => console.log('Ses çalınamadı:', e));
-                        
-                        // Bildirim göster
-                        if (Notification.permission === 'granted') {
-                            new Notification('🛎️ Yeni Sipariş!', {
-                                body: `${siparisler.length - oncekiSiparisSayisi} yeni sipariş geldi`,
-                                icon: 'https://tilla-pastanesi-siparis.onrender.com/favicon.ico'
-                            });
-                        }
+                        // SES ÇAL
+                        document.getElementById('siparisSesi').play();
                     }
                     oncekiSiparisSayisi = siparisler.length;
-                    
-                    // Siparişleri göster
+
+                    // SİPARİŞLERİ GÖSTER
                     const container = document.getElementById('siparisler');
                     
                     if (siparisler.length === 0) {
@@ -59,9 +49,10 @@
                     }
 
                     let html = '';
-                    siparisler.forEach(sip => {
+                    siparisler.reverse().forEach(sip => {
                         let masaNo = sip.masa || 'Belirtilmemiş';
                         let tarih = sip.tarih || '';
+                        
                         let urunlerHtml = '';
                         let toplam = 0;
                         
@@ -81,7 +72,7 @@
                                 `;
                             });
                         }
-                        
+
                         html += `
                             <div class="siparis">
                                 <div class="siparis-header">
@@ -95,14 +86,12 @@
                     });
                     
                     container.innerHTML = html;
-                })
-                .catch(err => {
-                    console.error('Hata:', err);
                 });
         }
-        
-        // Sayfa yüklenince ve her 5 saniyede bir yenile
+
+        // Sayfa yüklenince çalıştır
         siparisleriGetir();
+        // 5 saniyede bir yenile
         setInterval(siparisleriGetir, 5000);
     </script>
 </body>
