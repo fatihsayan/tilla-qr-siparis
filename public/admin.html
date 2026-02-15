@@ -5,20 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tilla Pastanesi - Sipariş Paneli</title>
     <style>
-        body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 20px; }
-        h1 { color: #d2691e; }
-        .siparis { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #d2691e; }
-        .siparis-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .masa { background: #d2691e; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-        .urun { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #eee; }
-        .toplam { margin-top: 10px; font-weight: bold; color: #d2691e; font-size: 1.2em; }
-        .zaman { color: #666; font-size: 0.9em; }
-        button { background: #d2691e; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-size: 16px; }
-        .yok { text-align: center; color: #666; padding: 50px; }
+        body { 
+            font-family: Arial; 
+            background: #f5f5f5; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        h1 { 
+            color: #d2691e; 
+        }
+        .siparis { 
+            background: white; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            border-left: 5px solid #d2691e; 
+        }
+        .siparis-header { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 10px; 
+        }
+        .masa { 
+            background: #d2691e; 
+            color: white; 
+            padding: 5px 10px; 
+            border-radius: 5px; 
+            font-weight: bold; 
+        }
+        .urun { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 5px 0; 
+            border-bottom: 1px dashed #eee; 
+        }
+        .toplam { 
+            margin-top: 10px; 
+            font-weight: bold; 
+            color: #d2691e; 
+            font-size: 1.2em; 
+        }
+        .zaman { 
+            color: #666; 
+            font-size: 0.9em; 
+        }
+        button { 
+            background: #d2691e; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-bottom: 20px; 
+            font-size: 16px; 
+        }
+        .yok { 
+            text-align: center; 
+            color: #666; 
+            padding: 50px; 
+        }
     </style>
-    <!-- SES İÇİN: Buraya istediğin ses dosyasının linkini ekleyeceksin -->
+    <!-- SES İÇİN -->
     <audio id="siparisSesi" preload="auto" style="display: none;">
-        <source src="bildirimsesi.mp3" type="audio/mpeg">
+        <source src="/ses/bildirimsesi.mp3" type="audio/mpeg">
     </audio>
 </head>
 <body>
@@ -33,26 +83,33 @@
             fetch('/admin/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
-                    // YENİ SİPARİŞ KONTROLÜ VE SES
+                    console.log('Gelen siparişler:', siparisler);
+                    
+                    // YENİ SİPARİŞ SESİ
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
-                        // SES ÇAL
-                        document.getElementById('siparisSesi').play();
+                        document.getElementById('siparisSesi').play().catch(e => console.log('Ses hatası:', e));
                     }
                     oncekiSiparisSayisi = siparisler.length;
 
                     // SİPARİŞLERİ GÖSTER
                     const container = document.getElementById('siparisler');
                     
-                    if (siparisler.length === 0) {
+                    if (!siparisler || siparisler.length === 0) {
                         container.innerHTML = '<div class="yok">Henüz sipariş yok</div>';
                         return;
                     }
 
                     let html = '';
+                    
+                    // En yeni siparişler önce gösterilsin diye reverse
                     siparisler.reverse().forEach(sip => {
+                        // Masa numarası kontrolü
                         let masaNo = sip.masa || 'Belirtilmemiş';
+                        
+                        // Tarih kontrolü
                         let tarih = sip.tarih || '';
                         
+                        // Ürünleri listele
                         let urunlerHtml = '';
                         let toplam = 0;
                         
@@ -71,6 +128,8 @@
                                     </div>
                                 `;
                             });
+                        } else {
+                            urunlerHtml = '<div class="urun">Ürün bilgisi yok</div>';
                         }
 
                         html += `
@@ -86,13 +145,19 @@
                     });
                     
                     container.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Hata:', err);
+                    document.getElementById('siparisler').innerHTML = 
+                        '<div class="yok">Hata oluştu: ' + err.message + '</div>';
                 });
         }
-
+        
         // Sayfa yüklenince çalıştır
         siparisleriGetir();
-        // 5 saniyede bir yenile
-        setInterval(siparisleriGetir, 5000);
+        
+        // 3 saniyede bir otomatik yenile
+        setInterval(siparisleriGetir, 3000);
     </script>
 </body>
 </html>
