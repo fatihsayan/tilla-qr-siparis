@@ -5,77 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tilla Pastanesi - Admin Paneli</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            background: #f5f5f5;
-            padding: 20px;
-        }
-        .header {
-            background: #d2691e;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .yenile-btn {
-            background: white;
-            color: #d2691e;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .siparis {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 5px solid #d2691e;
-        }
-        .siparis-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .masa {
-            background: #d2691e;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        .urun {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px dashed #eee;
-        }
-        .toplam {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #d2691e;
-            font-size: 1.2em;
-        }
-        .zaman {
-            color: #666;
-        }
-        .yok {
-            text-align: center;
-            padding: 50px;
-            color: #666;
-        }
+        /* CSS kodların aynen burada olacak */
     </style>
+    <!-- Basit ses dosyası -->
+    <audio id="notificationSound" preload="auto" style="display: none;">
+        <source src="https://www.soundjay.com/misc/sounds/notification-bell-1.mp3" type="audio/mpeg">
+    </audio>
 </head>
 <body>
     <div class="header">
@@ -88,29 +23,45 @@
     </div>
 
     <script>
+        // Bildirim izni iste
+        if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+            Notification.requestPermission();
+        }
+
+        let oncekiSiparisSayisi = 0;
+
         function siparisleriGetir() {
             fetch('/admin/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
-                    console.log('Gelen siparişler:', siparisler);
+                    // Yeni sipariş kontrolü
+                    if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
+                        // Ses çal
+                        const ses = document.getElementById('notificationSound');
+                        ses.play().catch(e => console.log('Ses çalınamadı:', e));
+                        
+                        // Bildirim göster
+                        if (Notification.permission === 'granted') {
+                            new Notification('🛎️ Yeni Sipariş!', {
+                                body: `${siparisler.length - oncekiSiparisSayisi} yeni sipariş geldi`,
+                                icon: 'https://tilla-pastanesi-siparis.onrender.com/favicon.ico'
+                            });
+                        }
+                    }
+                    oncekiSiparisSayisi = siparisler.length;
                     
+                    // Siparişleri göster
                     const container = document.getElementById('siparisler');
                     
-                    if (!siparisler || siparisler.length === 0) {
+                    if (siparisler.length === 0) {
                         container.innerHTML = '<div class="yok">Henüz sipariş yok</div>';
                         return;
                     }
 
                     let html = '';
-                    
                     siparisler.forEach(sip => {
-                        // Masa numarası
                         let masaNo = sip.masa || 'Belirtilmemiş';
-                        
-                        // Tarih formatla
                         let tarih = sip.tarih || '';
-                        
-                        // Ürünleri listele
                         let urunlerHtml = '';
                         let toplam = 0;
                         
@@ -129,8 +80,6 @@
                                     </div>
                                 `;
                             });
-                        } else {
-                            urunlerHtml = '<div class="urun">Ürün bilgisi yok</div>';
                         }
                         
                         html += `
@@ -149,8 +98,6 @@
                 })
                 .catch(err => {
                     console.error('Hata:', err);
-                    document.getElementById('siparisler').innerHTML = 
-                        '<div class="yok">Hata oluştu: ' + err.message + '</div>';
                 });
         }
         
