@@ -1,104 +1,52 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tilla Pastanesi - Sipariş Paneli</title>
+    <title>Tilla Pastanesi - Siparişler</title>
     <style>
-        body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 20px; }
-        h1 { color: #d2691e; }
-        .siparis { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #d2691e; }
-        .siparis-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .masa { background: #d2691e; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-        .urun { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #eee; }
-        .toplam { margin-top: 10px; font-weight: bold; color: #d2691e; font-size: 1.2em; }
-        .zaman { color: #666; font-size: 0.9em; }
-        button { background: #d2691e; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-size: 16px; }
-        .yok { text-align: center; color: #666; padding: 50px; }
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .siparis { background: white; margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 5px solid #d2691e; }
+        .masa { background: #d2691e; color: white; padding: 5px 10px; border-radius: 5px; display: inline-block; }
+        .urun { border-bottom: 1px solid #eee; padding: 5px 0; }
+        .toplam { font-weight: bold; color: #d2691e; margin-top: 10px; }
+        button { background: #d2691e; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>📋 Tilla Pastanesi - Sipariş Paneli</h1>
-    <button onclick="siparisleriGetir()">🔄 Yenile</button>
-    <div id="siparisler">Yükleniyor...</div>
+    <h1>📋 Tilla Pastanesi - Siparişler</h1>
+    <button onclick="yenile()">🔄 Yenile</button>
+    <div id="siparisler"></div>
 
     <script>
-        function siparisleriGetir() {
+        function yenile() {
             fetch('/admin/siparisler')
                 .then(res => res.json())
-                .then(siparisler => {
-                    console.log("Gelen siparişler:", siparisler); // DEBUG İÇİN
-                    
-                    const container = document.getElementById('siparisler');
-                    
-                    if (!siparisler || siparisler.length === 0) {
-                        container.innerHTML = '<div class="yok">Henüz sipariş yok</div>';
-                        return;
-                    }
-
+                .then(data => {
                     let html = '';
-                    siparisler.forEach(sip => {
-                        // Sipariş yapısını kontrol et
-                        console.log("Sipariş detayı:", sip);
-                        
-                        // Ürünleri listele
-                        let urunlerHtml = '';
-                        if (sip.urunler && Array.isArray(sip.urunler)) {
-                            sip.urunler.forEach(u => {
-                                urunlerHtml += `
-                                    <div class="urun">
-                                        <span>${u.isim || 'Ürün'} x ${u.adet || 1}</span>
-                                        <span>${(u.fiyat * (u.adet || 1)) || 0} TL</span>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            urunlerHtml = '<div class="urun">Ürün bilgisi yok</div>';
-                        }
-
-                        // Toplam hesapla
+                    data.forEach(s => {
+                        let masa = s.masa || 'Belirtilmemiş';
+                        let tarih = s.tarih ? new Date(s.tarih).toLocaleString('tr-TR') : '';
+                        let urunler = '';
                         let toplam = 0;
-                        if (sip.urunler && Array.isArray(sip.urunler)) {
-                            toplam = sip.urunler.reduce((t, u) => t + (u.fiyat * (u.adet || 1)), 0);
-                        } else if (sip.toplam) {
-                            toplam = sip.toplam;
-                        }
-
-                        // Tarih formatla
-                        let tarih = '';
-                        if (sip.tarih) {
-                            try {
-                                tarih = new Date(sip.tarih).toLocaleString('tr-TR');
-                            } catch (e) {
-                                tarih = sip.tarih;
-                            }
-                        }
-
+                        
+                        s.urunler.forEach(u => {
+                            urunler += `<div class="urun">${u.urun || u.isim || 'Ürün'} x 1 - ${u.fiyat || u.price || 0} TL</div>`;
+                            toplam += (u.fiyat || u.price || 0);
+                        });
+                        
                         html += `
                             <div class="siparis">
-                                <div class="siparis-header">
-                                    <span class="masa">Masa ${sip.masa || '?'}</span>
-                                    <span class="zaman">${tarih}</span>
-                                </div>
-                                <div>${urunlerHtml}</div>
+                                <div><span class="masa">Masa ${masa}</span> <span style="float:right">${tarih}</span></div>
+                                ${urunler}
                                 <div class="toplam">Toplam: ${toplam} TL</div>
                             </div>
                         `;
                     });
-                    
-                    container.innerHTML = html;
-                })
-                .catch(err => {
-                    console.error("Hata:", err);
-                    document.getElementById('siparisler').innerHTML = 'Hata oluştu: ' + err.message;
+                    document.getElementById('siparisler').innerHTML = html;
                 });
         }
-
-        // Sayfa yüklenince getir
-        siparisleriGetir();
-        
-        // 30 saniyede bir otomatik yenile
-        setInterval(siparisleriGetir, 30000);
+        yenile();
+        setInterval(yenile, 5000);
     </script>
 </body>
 </html>
