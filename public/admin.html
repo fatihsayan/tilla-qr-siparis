@@ -5,66 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tilla Pastanesi - Sipariş Paneli</title>
     <style>
-        body { 
-            font-family: Arial; 
-            background: #f5f5f5; 
-            margin: 0; 
-            padding: 20px; 
-        }
-        h1 { 
-            color: #d2691e; 
-        }
-        .siparis { 
-            background: white; 
-            border-radius: 8px; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-            border-left: 5px solid #d2691e; 
-        }
-        .siparis-header { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 10px; 
-        }
-        .masa { 
-            background: #d2691e; 
-            color: white; 
-            padding: 5px 10px; 
-            border-radius: 5px; 
-            font-weight: bold; 
-        }
-        .urun { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 5px 0; 
-            border-bottom: 1px dashed #eee; 
-        }
-        .toplam { 
-            margin-top: 10px; 
-            font-weight: bold; 
-            color: #d2691e; 
-            font-size: 1.2em; 
-        }
-        .zaman { 
-            color: #666; 
-            font-size: 0.9em; 
-        }
-        button { 
-            background: #d2691e; 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            margin-bottom: 20px; 
-            font-size: 16px; 
-        }
-        .yok { 
-            text-align: center; 
-            color: #666; 
-            padding: 50px; 
-        }
+        body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 20px; }
+        h1 { color: #d2691e; }
+        .siparis { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #d2691e; }
+        .siparis-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .masa { background: #d2691e; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .urun { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #eee; }
+        .toplam { margin-top: 10px; font-weight: bold; color: #d2691e; font-size: 1.2em; }
+        .zaman { color: #666; font-size: 0.9em; }
+        button { background: #d2691e; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-size: 16px; }
+        .yok { text-align: center; color: #666; padding: 50px; }
     </style>
     <!-- SES İÇİN -->
     <audio id="siparisSesi" preload="auto" style="display: none;">
@@ -81,9 +31,38 @@
 
         function siparisleriGetir() {
             fetch('/admin/siparisler')
-                .then(res => res.json())
-                .then(siparisler => {
-                    console.log('Gelen siparişler:', siparisler);
+                .then(res => res.text())  // Önce text olarak al
+                .then(text => {
+                    console.log('Ham veri:', text);
+                    
+                    // Veriyi düzenle ve JSON'a çevir
+                    let siparisler = [];
+                    try {
+                        // Önce normal parse dene
+                        siparisler = JSON.parse(text);
+                    } catch (e) {
+                        console.log('JSON parse hatası, düzenleniyor...');
+                        try {
+                            // Bozuk JSON'u düzeltmeye çalış
+                            const duzeltilmis = text
+                                .replace(/\}\s*\{/g, '},{')  // Arka arkaya objeleri ayır
+                                .replace(/\}\s*\]/g, '}]')    // Kapanışları düzelt
+                                .replace(/\[\s*\{/g, '[{')     // Açılışları düzelt
+                                .replace(/\}\s*\{/g, '},{');   // Tekrar dene
+                            
+                            // Başına [ ve sonuna ] ekle yoksa
+                            if (!duzeltilmis.startsWith('[')) {
+                                siparisler = JSON.parse('[' + duzeltilmis + ']');
+                            } else {
+                                siparisler = JSON.parse(duzeltilmis);
+                            }
+                        } catch (e2) {
+                            console.log('Düzeltme de başarısız:', e2);
+                            siparisler = [];
+                        }
+                    }
+
+                    console.log('Düzenlenmiş siparişler:', siparisler);
                     
                     // YENİ SİPARİŞ SESİ
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
@@ -101,15 +80,14 @@
 
                     let html = '';
                     
-                    // En yeni siparişler önce gösterilsin diye reverse
                     siparisler.reverse().forEach(sip => {
-                        // Masa numarası kontrolü
+                        // Masa numarası
                         let masaNo = sip.masa || 'Belirtilmemiş';
                         
-                        // Tarih kontrolü
+                        // Tarih
                         let tarih = sip.tarih || '';
                         
-                        // Ürünleri listele
+                        // Ürünler
                         let urunlerHtml = '';
                         let toplam = 0;
                         
@@ -128,8 +106,6 @@
                                     </div>
                                 `;
                             });
-                        } else {
-                            urunlerHtml = '<div class="urun">Ürün bilgisi yok</div>';
                         }
 
                         html += `
@@ -138,7 +114,7 @@
                                     <span class="masa">Masa ${masaNo}</span>
                                     <span class="zaman">${tarih}</span>
                                 </div>
-                                ${urunlerHtml}
+                                ${urunlerHtml || '<div class="urun">Ürün yok</div>'}
                                 <div class="toplam">Toplam: ${toplam} TL</div>
                             </div>
                         `;
@@ -149,14 +125,11 @@
                 .catch(err => {
                     console.error('Hata:', err);
                     document.getElementById('siparisler').innerHTML = 
-                        '<div class="yok">Hata oluştu: ' + err.message + '</div>';
+                        '<div class="yok">Hata: ' + err.message + '</div>';
                 });
         }
         
-        // Sayfa yüklenince çalıştır
         siparisleriGetir();
-        
-        // 3 saniyede bir otomatik yenile
         setInterval(siparisleriGetir, 3000);
     </script>
 </body>
