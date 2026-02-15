@@ -18,7 +18,6 @@
             padding-bottom: 30px;
         }
 
-        /* HEADER */
         .header {
             background: linear-gradient(135deg, #d2691e, #b85e1a);
             color: white;
@@ -61,11 +60,6 @@
             transform: scale(1.02);
         }
 
-        .yenile-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* İSTATİSTİK KARTLARI */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -88,13 +82,6 @@
             color: #d2691e;
         }
 
-        .stat-card .label {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        /* SİPARİŞLER */
         .siparisler {
             display: flex;
             flex-direction: column;
@@ -107,24 +94,6 @@
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border-left: 6px solid #d2691e;
-            transition: transform 0.2s;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .siparis:hover {
-            transform: translateX(5px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
         }
 
         .siparis-header {
@@ -143,10 +112,6 @@
             border-radius: 50px;
             font-weight: bold;
             font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 8px rgba(210, 105, 30, 0.3);
         }
 
         .zaman {
@@ -168,7 +133,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px dashed #e0e0e0;
         }
 
@@ -178,22 +143,15 @@
 
         .urun-adi {
             font-weight: 500;
-            color: #333;
         }
 
         .urun-adet {
             background: #d2691e20;
             color: #d2691e;
-            padding: 3px 10px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .urun-fiyat {
-            font-weight: bold;
-            color: #d2691e;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 8px;
         }
 
         .siparis-footer {
@@ -217,281 +175,107 @@
             padding: 6px 15px;
             border-radius: 50px;
             font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* YÜKLENİYOR */
-        .yukleniyor {
-            text-align: center;
-            padding: 50px;
-            color: #d2691e;
-            font-size: 1.2rem;
-        }
-
-        /* YOK */
-        .yok {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 15px;
-            color: #888;
-            font-size: 1.1rem;
-            border: 2px dashed #ddd;
-        }
-
-        .yok span {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .header h1 {
-                font-size: 1.4rem;
-            }
-
-            .yenile-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .siparis-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .masa-badge {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .zaman {
-                width: 100%;
-                text-align: center;
-            }
-
-            .urun {
-                flex-direction: column;
-                gap: 5px;
-                align-items: flex-start;
-            }
-
-            .siparis-footer {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-
-            .toplam {
-                width: 100%;
-            }
-
-            .durum {
-                width: 100%;
-                text-align: center;
-            }
         }
     </style>
 </head>
 <body>
-
     <div class="header">
-        <h1>
-            <span>📋</span> 
-            Tilla Pastanesi - Sipariş Paneli
-        </h1>
-        <button class="yenile-btn" onclick="siparisleriGetir()" id="yenileBtn">
-            <span>🔄</span> 
-            Yenile
-        </button>
+        <h1>📋 Tilla Pastanesi - Sipariş Paneli</h1>
+        <button class="yenile-btn" onclick="siparisleriGetir()">🔄 Yenile</button>
     </div>
 
-    <!-- İSTATİSTİKLER -->
-    <div class="stats" id="stats">
+    <div class="stats">
         <div class="stat-card">
             <div class="sayi" id="toplamSiparis">0</div>
-            <div class="label">Toplam Sipariş</div>
-        </div>
-        <div class="stat-card">
-            <div class="sayi" id="bekleyenSiparis">0</div>
-            <div class="label">Bekleyen</div>
+            <div>Toplam Sipariş</div>
         </div>
         <div class="stat-card">
             <div class="sayi" id="bugunSiparis">0</div>
-            <div class="label">Bugün</div>
+            <div>Bugün</div>
         </div>
     </div>
 
-    <!-- SİPARİŞLER -->
     <div class="siparisler" id="siparisler">
-        <div class="yukleniyor">Siparişler yükleniyor...</div>
+        <div style="text-align: center; padding: 50px;">Yükleniyor...</div>
     </div>
 
     <script>
         function siparisleriGetir() {
-            const yenileBtn = document.getElementById('yenileBtn');
-            yenileBtn.innerHTML = '<span>⏳</span> Yükleniyor...';
-            yenileBtn.disabled = true;
-
             fetch('/admin/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
-                    console.log("Gelen siparişler:", siparisler);
+                    console.log('Gelen siparişler:', siparisler);
                     
-                    // İstatistikleri güncelle
-                    istatistikleriGuncelle(siparisler);
+                    // İstatistikler
+                    document.getElementById('toplamSiparis').textContent = siparisler.length;
                     
+                    const bugun = new Date().toDateString();
+                    const bugunSiparis = siparisler.filter(s => 
+                        new Date(s.tarih).toDateString() === bugun
+                    ).length;
+                    document.getElementById('bugunSiparis').textContent = bugunSiparis;
+                    
+                    // Siparişleri listele
                     const container = document.getElementById('siparisler');
                     
-                    if (!siparisler || siparisler.length === 0) {
-                        container.innerHTML = '<div class="yok"><span>🍰</span>Henüz sipariş yok</div>';
-                        yenileBtn.innerHTML = '<span>🔄</span> Yenile';
-                        yenileBtn.disabled = false;
+                    if (siparisler.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; padding: 50px;">Henüz sipariş yok</div>';
                         return;
                     }
-
-                    let html = '';
                     
-                    // Siparişleri ters sırala (en yeni en üstte)
-                    siparisler.reverse().forEach((sip, index) => {
-                        // Masa numarası kontrolü
-                        let masaNo = sip.masa;
-                        if (masaNo === null || masaNo === undefined || masaNo === '') {
-                            masaNo = '❓ Belirtilmemiş';
-                        } else {
-                            masaNo = `Masa ${masaNo}`;
-                        }
+                    let html = '';
+                    siparisler.reverse().forEach(sip => {
+                        const masaNo = sip.masa || 'Belirtilmemiş';
+                        const tarih = new Date(sip.tarih).toLocaleString('tr-TR');
                         
-                        // Ürünleri listele - ADETLER DOĞRU GÖSTERİLİYOR
                         let urunlerHtml = '';
                         let toplam = 0;
                         
-                        if (sip.urunler && Array.isArray(sip.urunler)) {
-                            sip.urunler.forEach(u => {
-                                // Ürün adı kontrolü
-                                const urunAdi = u.urun || u.isim || u.name || 'Ürün';
-                                // Fiyat kontrolü
-                                const fiyat = u.fiyat || u.price || 0;
-                                // ADET KONTROLÜ - BURASI ÖNEMLİ
-                                const adet = u.adet || 1;
-                                
-                                const araToplam = fiyat * adet;
-                                toplam += araToplam;
-                                
-                                urunlerHtml += `
-                                    <div class="urun">
-                                        <div>
-                                            <span class="urun-adi">${urunAdi}</span>
-                                            <span class="urun-adet">${adet} adet</span>
-                                        </div>
-                                        <span class="urun-fiyat">${araToplam} TL</span>
-                                    </div>
-                                `;
-                            });
-                        } else {
-                            urunlerHtml = '<div class="urun">Ürün bilgisi yok</div>';
-                        }
-
-                        // Tarih formatla
-                        let tarih = '';
-                        if (sip.tarih) {
-                            try {
-                                const date = new Date(sip.tarih);
-                                tarih = date.toLocaleDateString('tr-TR') + ' ' + 
-                                        date.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
-                            } catch (e) {
-                                tarih = sip.tarih;
-                            }
-                        }
-
+                        sip.urunler.forEach(u => {
+                            const urunAdi = u.urun || u.isim || 'Ürün';
+                            const fiyat = u.fiyat || 0;
+                            const adet = u.adet || 1;
+                            const araToplam = fiyat * adet;
+                            toplam += araToplam;
+                            
+                            urunlerHtml += `
+                                <div class="urun">
+                                    <span>
+                                        ${urunAdi} 
+                                        <span class="urun-adet">${adet} adet</span>
+                                    </span>
+                                    <span>${araToplam} TL</span>
+                                </div>
+                            `;
+                        });
+                        
                         html += `
-                            <div class="siparis" style="animation-delay: ${index * 0.05}s">
+                            <div class="siparis">
                                 <div class="siparis-header">
-                                    <div class="masa-badge">
-                                        <span>📌</span> 
-                                        ${masaNo}
-                                    </div>
-                                    <div class="zaman">
-                                        <span>⏰</span> 
-                                        ${tarih}
-                                    </div>
+                                    <span class="masa-badge">Masa ${masaNo}</span>
+                                    <span class="zaman">${tarih}</span>
                                 </div>
-                                
-                                <div class="urunler">
-                                    ${urunlerHtml}
-                                </div>
-                                
+                                <div class="urunler">${urunlerHtml}</div>
                                 <div class="siparis-footer">
-                                    <div class="toplam">
-                                        <span>💰</span> 
-                                        Toplam: ${toplam} TL
-                                    </div>
-                                    <div class="durum">
-                                        <span>✅</span> 
-                                        Yeni Sipariş
-                                    </div>
+                                    <span class="toplam">Toplam: ${toplam} TL</span>
+                                    <span class="durum">✅ Yeni</span>
                                 </div>
                             </div>
                         `;
                     });
                     
                     container.innerHTML = html;
-                    yenileBtn.innerHTML = '<span>🔄</span> Yenile';
-                    yenileBtn.disabled = false;
                 })
                 .catch(err => {
                     console.error('Hata:', err);
                     document.getElementById('siparisler').innerHTML = 
-                        '<div class="yok"><span>❌</span>Bağlantı hatası</div>';
-                    yenileBtn.innerHTML = '<span>🔄</span> Yenile';
-                    yenileBtn.disabled = false;
+                        '<div style="text-align: center; padding: 50px; color: red;">Hata oluştu</div>';
                 });
         }
-
-        // İstatistikleri güncelle
-        function istatistikleriGuncelle(siparisler) {
-            const toplam = siparisler.length;
-            document.getElementById('toplamSiparis').textContent = toplam;
-            
-            // Bekleyen sipariş sayısı (son 24 saat)
-            const bugun = new Date();
-            bugun.setHours(0, 0, 0, 0);
-            
-            const bugunSiparis = siparisler.filter(sip => {
-                if (!sip.tarih) return false;
-                const sipTarih = new Date(sip.tarih);
-                return sipTarih >= bugun;
-            }).length;
-            
-            document.getElementById('bugunSiparis').textContent = bugunSiparis;
-            
-            // Bekleyen siparişler (son 1 saat)
-            const birSaatOnce = new Date(Date.now() - 60 * 60 * 1000);
-            const bekleyen = siparisler.filter(sip => {
-                if (!sip.tarih) return false;
-                const sipTarih = new Date(sip.tarih);
-                return sipTarih >= birSaatOnce;
-            }).length;
-            
-            document.getElementById('bekleyenSiparis').textContent = bekleyen;
-        }
-
-        // Sayfa yüklendiğinde ve her 10 saniyede bir otomatik yenile
-        document.addEventListener('DOMContentLoaded', () => {
-            siparisleriGetir();
-            setInterval(siparisleriGetir, 10000); // 10 saniyede bir yenile
-        });
+        
+        // Sayfa yüklenince ve her 5 saniyede bir yenile
+        siparisleriGetir();
+        setInterval(siparisleriGetir, 5000);
     </script>
-
 </body>
 </html>
