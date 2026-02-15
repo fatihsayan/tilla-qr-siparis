@@ -27,35 +27,61 @@
             fetch('/admin/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
+                    console.log("Gelen siparişler:", siparisler); // DEBUG İÇİN
+                    
                     const container = document.getElementById('siparisler');
                     
-                    if (siparisler.length === 0) {
+                    if (!siparisler || siparisler.length === 0) {
                         container.innerHTML = '<div class="yok">Henüz sipariş yok</div>';
                         return;
                     }
 
                     let html = '';
-                    siparisler.reverse().forEach(sip => {
+                    siparisler.forEach(sip => {
+                        // Sipariş yapısını kontrol et
+                        console.log("Sipariş detayı:", sip);
+                        
+                        // Ürünleri listele
                         let urunlerHtml = '';
-                        if (sip.urunler) {
+                        if (sip.urunler && Array.isArray(sip.urunler)) {
                             sip.urunler.forEach(u => {
                                 urunlerHtml += `
                                     <div class="urun">
-                                        <span>${u.isim} x ${u.adet}</span>
-                                        <span>${u.fiyat * u.adet} TL</span>
+                                        <span>${u.isim || 'Ürün'} x ${u.adet || 1}</span>
+                                        <span>${(u.fiyat * (u.adet || 1)) || 0} TL</span>
                                     </div>
                                 `;
                             });
+                        } else {
+                            urunlerHtml = '<div class="urun">Ürün bilgisi yok</div>';
+                        }
+
+                        // Toplam hesapla
+                        let toplam = 0;
+                        if (sip.urunler && Array.isArray(sip.urunler)) {
+                            toplam = sip.urunler.reduce((t, u) => t + (u.fiyat * (u.adet || 1)), 0);
+                        } else if (sip.toplam) {
+                            toplam = sip.toplam;
+                        }
+
+                        // Tarih formatla
+                        let tarih = '';
+                        if (sip.tarih) {
+                            try {
+                                tarih = new Date(sip.tarih).toLocaleString('tr-TR');
+                            } catch (e) {
+                                tarih = sip.tarih;
+                            }
                         }
 
                         html += `
                             <div class="siparis">
                                 <div class="siparis-header">
                                     <span class="masa">Masa ${sip.masa || '?'}</span>
-                                    <span class="zaman">${sip.tarih || ''}</span>
+                                    <span class="zaman">${tarih}</span>
                                 </div>
                                 <div>${urunlerHtml}</div>
-                                <div class="toplam">Toplam: ${sip.toplam || '?'} TL</div>
+                                <div class="toplam">Toplam: ${toplam} TL</div>
                             </div>
                         `;
                     });
@@ -63,6 +89,7 @@
                     container.innerHTML = html;
                 })
                 .catch(err => {
+                    console.error("Hata:", err);
                     document.getElementById('siparisler').innerHTML = 'Hata oluştu: ' + err.message;
                 });
         }
