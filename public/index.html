@@ -22,7 +22,7 @@
         /* HEADER */
         header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             padding: 15px;
             background: linear-gradient(135deg, #d2691e, #b85e1a);
             color: white;
@@ -54,6 +54,41 @@
             margin-left: 5px;
         }
 
+        /* GARSON ÇAĞIR BUTONU */
+        .garson-buton {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .garson-buton button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+
+        .garson-buton button:active {
+            transform: scale(0.95);
+        }
+
+        .garson-buton button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         /* KATEGORİ BAŞLIKLARI */
         .kategori-baslik {
             grid-column: 1/-1;
@@ -68,7 +103,7 @@
             display: inline-block;
         }
 
-        /* MENÜ GRID - DÜZELTİLMİŞ RESPONSIVE */
+        /* MENÜ GRID */
         .menu {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -76,7 +111,7 @@
             margin-bottom: 30px;
         }
 
-        /* MENÜ ÖĞESİ - TÜM KARTLAR AYNI BOYDA */
+        /* MENÜ ÖĞESİ */
         .item {
             background: white;
             border-radius: 15px;
@@ -87,7 +122,6 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-height: 220px;
         }
 
         .item:active {
@@ -122,7 +156,6 @@
             margin-bottom: 4px;
             color: #333;
             font-weight: 600;
-            line-height: 1.2;
             min-height: 2.4em;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -314,24 +347,27 @@
             to { bottom: 80px; opacity: 1; }
         }
 
-        /* ÇOK KÜÇÜK EKRANLAR İÇİN */
         @media (max-width: 350px) {
             .menu {
                 grid-template-columns: 1fr;
-            }
-            
-            .item {
-                min-height: 200px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- AYNI HTML İÇERİĞİ (değişmedi) -->
+
     <header>
         <h1>🍰 Tilla Pastanesi</h1>
         <h2>Masa No: <span id="masaNo">Yükleniyor...</span></h2>
     </header>
+
+    <!-- GARSON ÇAĞIR BUTONU -->
+    <div class="garson-buton">
+        <button onclick="garsonCagir()" id="garsonBtn">
+            <span style="font-size: 1.5rem;">🛎️</span>
+            Garson Çağır
+        </button>
+    </div>
 
     <main>
         <section>
@@ -363,7 +399,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // ========== MENÜ VERİSİ - KATEGORİLİ ==========
+         // ========== MENÜ VERİSİ - KATEGORİLİ ==========
         const menu = [
             // 🍰 TATLILAR
             { id: 1, isim: "Şekerpare Porsiyon", fiyat: 70, kategori: "tatli", aciklama: "Şerbetli tatlı", resim: "images/sekerpare.jpg", emoji: "🍰" },
@@ -373,7 +409,7 @@
             { id: 5, isim: "Baton Pasta Dilim", fiyat: 90, kategori: "tatli", aciklama: "Çikolata kaplı", resim: "images/baton.jpg", emoji: "🍰" },
             { id: 6, isim: "Dubai Çikolatası", fiyat: 400, kategori: "tatli", aciklama: "Özel Dubai çikolatası", resim: "images/dubai.jpg", emoji: "🍰" },
             { id: 7, isim: "Kurabiye Porsiyon", fiyat:100, kategori: "tatli", aciklama: "Tereyağlı kurabiye", resim: "images/kurabiye.jpg", emoji: "🍰" },
-            { id: 8, isim: "Kek Adet", fiyat: 50, kategori: "tatli", aciklama: "Ev yapımı kek", resim: "images/kekk.jpg", emoji: "🍰" },
+            { id: 8, isim: "Kek Adet", fiyat: 50, kategori: "tatli", aciklama: "Ev yapımı kek", resim: "images/keks.jpg", emoji: "🍰" },
 
             // 🥐 YİYECEKLER
            { id: 9, isim: "Kır pidesi", fiyat: 50, kategori: "yiyecek", aciklama: "Kıymalı,Peynirli,Patatesli", resim: "images/kirpidesi.jpg", emoji: "🍰" },
@@ -385,20 +421,50 @@
 
             // 🥤 İÇECEKLER
             { id: 21, isim: "Çay", fiyat: 30, kategori: "icecek", aciklama: "Demlik çay", resim: "images/cay.jpeg", emoji: "🥤" },
-            { id: 22, isim: "Kola", fiyat: 60, kategori: "icecek", aciklama: "Soğuk kola", resim: "images/kolaa.jpg", emoji: "🥤" },
-            { id: 23, isim: "Meyve Suyu", fiyat: 40, kategori: "icecek", aciklama: "Şeftali/Portakal/Kayısı", resim: "images/dimes.jpg", emoji: "🥤" },
+            { id: 22, isim: "Kola", fiyat: 60, kategori: "icecek", aciklama: "Soğuk kola", resim: "images/kolaaa.jpg", emoji: "🥤" },
+            { id: 23, isim: "Meyve Suyu", fiyat: 40, kategori: "icecek", aciklama: "Şeftali/Portakal/Kayısı", resim: "images/meyvesuyuu.jpg", emoji: "🥤" },
             { id: 24, isim: "Ayran", fiyat: 40, kategori: "icecek", aciklama: "Soğuk ayran", resim: "images/ayran.jpg", emoji: "🥤" },
             { id: 25, isim: "Limonata", fiyat: 50, kategori: "icecek", aciklama: "Taze sıkım limonata", resim: "images/limonata.jpg", emoji: "🥤" }
         ];
-
-        // JavaScript kodu aynen devam ediyor...
         let sepet = [];
         let sepetAcik = false;
 
+        // URL'den masa numarasını al
         const urlParams = new URLSearchParams(window.location.search);
         const masaNo = urlParams.get('masa') || '1';
         document.getElementById('masaNo').textContent = masaNo;
 
+        // GARSON ÇAĞIR FONKSİYONU
+        window.garsonCagir = function() {
+            const btn = document.getElementById('garsonBtn');
+            
+            fetch('/garson-cagir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ masa: masaNo })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.basarili) {
+                    toastGoster('🛎️ Garson çağrıldı! Biraz bekleyin.');
+                    
+                    btn.disabled = true;
+                    btn.style.background = '#ccc';
+                    btn.innerHTML = '<span style="font-size:1.5rem;">✅</span> Çağrıldı';
+                    
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.style.background = '#4caf50';
+                        btn.innerHTML = '<span style="font-size:1.5rem;">🛎️</span> Garson Çağır';
+                    }, 30000);
+                }
+            })
+            .catch(() => {
+                toastGoster('Hata oluştu!');
+            });
+        };
+
+        // MENÜYÜ GÖSTER
         function menuyuGoster() {
             const menuDiv = document.getElementById('menu');
             
@@ -427,19 +493,19 @@
         }
 
         function urunKarti(urun) {
-    return `
-        <div class="item">
-            <img src="${urun.resim}" alt="${urun.isim}" class="urun-resim" 
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                 style="display: block;">
-            <div class="emoji-kutu" style="display: none;">${urun.emoji}</div>
-            <h3>${urun.isim}</h3>
-            <p>${urun.aciklama || ''}</p>
-            <div class="fiyat">${urun.fiyat} TL</div>
-            <button onclick="sepeteEkle(${urun.id})">Sepete Ekle</button>
-        </div>
-    `;
-}
+            return `
+                <div class="item">
+                    <img src="${urun.resim}" alt="${urun.isim}" class="urun-resim" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                         style="display: block;">
+                    <div class="emoji-kutu" style="display: none;">${urun.emoji}</div>
+                    <h3>${urun.isim}</h3>
+                    <p>${urun.aciklama || ''}</p>
+                    <div class="fiyat">${urun.fiyat} TL</div>
+                    <button onclick="sepeteEkle(${urun.id})">Sepete Ekle</button>
+                </div>
+            `;
+        }
 
         window.sepeteEkle = function(id) {
             const urun = menu.find(u => u.id === id);
@@ -522,8 +588,7 @@
                     fiyat: u.fiyat,
                     adet: u.adet
                 })),
-                toplam: sepet.reduce((t, u) => t + (u.fiyat * u.adet), 0),
-                tarih: new Date().toLocaleString('tr-TR')
+                toplam: sepet.reduce((t, u) => t + (u.fiyat * u.adet), 0)
             };
 
             fetch('/siparis', {

@@ -1,3 +1,5 @@
+process.env.TZ = 'Europe/Istanbul'; // Türkiye saat dilimi
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -10,7 +12,7 @@ app.use(express.static('public'));
 // Sipariş kaydet
 app.post('/siparis', (req, res) => {
     const siparis = req.body;
-    siparis.tarih = new Date().toLocaleString('tr-TR');
+    siparis.tarih = new Date().toISOString();
     
     let siparisler = [];
     try {
@@ -36,6 +38,48 @@ app.get('/siparisler', (req, res) => {
     } catch (e) {
         res.json([]);
     }
+});
+
+// Garson çağır
+app.post('/garson-cagir', (req, res) => {
+    const masaNo = req.body.masa || 'Belirtilmemiş';
+    const zaman = new Date().toLocaleString('tr-TR');
+    
+    let cagrilar = [];
+    try {
+        if (fs.existsSync('cagrilar.json')) {
+            cagrilar = JSON.parse(fs.readFileSync('cagrilar.json'));
+        }
+    } catch (e) {}
+    
+    cagrilar.push({
+        masa: masaNo,
+        zaman: zaman,
+        id: Date.now().toString(),
+        durum: 'bekliyor'
+    });
+    
+    fs.writeFileSync('cagrilar.json', JSON.stringify(cagrilar, null, 2));
+    res.json({ basarili: true });
+});
+
+// Garson çağrılarını getir
+app.get('/garson-cagrilar', (req, res) => {
+    try {
+        if (fs.existsSync('cagrilar.json')) {
+            const cagrilar = JSON.parse(fs.readFileSync('cagrilar.json'));
+            res.json(cagrilar);
+        } else {
+            res.json([]);
+        }
+    } catch (e) {
+        res.json([]);
+    }
+});
+
+// Health check
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
 });
 
 app.listen(PORT, () => {
