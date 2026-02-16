@@ -312,17 +312,25 @@
         let oncekiSiparisSayisi = 0;
         let oncekiCagriSayisi = 0;
 
-        // GARSON ÇAĞRILARINI GETİR (SADECE YAZI)
+        // GARSON ÇAĞRILARINI GETİR (POPUP BİLDİRİMLİ)
         function garsonCagrilariniGetir() {
             fetch('/garson-cagrilar')
                 .then(res => res.json())
                 .then(cagrilar => {
-                    // Yeni çağrı varsa sayfada göster (ses YOK)
+                    console.log('Garson çağrıları:', cagrilar);
+                    
+                    // YENİ ÇAĞRI VARSA POPUP GÖSTER
                     if (cagrilar.length > oncekiCagriSayisi) {
-                        // Sadece ekrana düşsün, ses yok
+                        // Son eklenen çağrıları bul
+                        const yeniCagrilar = cagrilar.slice(oncekiCagriSayisi);
+                        yeniCagrilar.forEach(c => {
+                            // POPUP BİLDİRİM
+                            alert(`🛎️ GARSON ÇAĞRISI!\nMasa ${c.masa} garson çağırıyor.`);
+                        });
                     }
                     oncekiCagriSayisi = cagrilar.length;
 
+                    // Garson çağrılarını gösterme (SARI KUTU)
                     if (cagrilar.length === 0) {
                         document.getElementById('garsonCagriBolumu').innerHTML = '';
                         return;
@@ -331,9 +339,27 @@
                     // Son 10 dakikadaki çağrıları göster
                     const simdi = new Date();
                     const sonCagrilar = cagrilar.filter(c => {
-                        const tarihStr = c.zaman.split(' ').reverse().join(' ');
-                        const cagriZamani = new Date(tarihStr);
-                        return (simdi - cagriZamani) < 10 * 60 * 1000; // 10 dakika
+                        try {
+                            // Tarih formatını düzelt (GG.AA.YYYY SS:DD:SS)
+                            const parts = c.zaman.split(' ');
+                            if (parts.length >= 2) {
+                                const tarihParts = parts[0].split('.');
+                                const saatParts = parts[1].split(':');
+                                if (tarihParts.length === 3 && saatParts.length >= 2) {
+                                    const cagriZamani = new Date(
+                                        tarihParts[2], // yıl
+                                        tarihParts[1] - 1, // ay (0-11)
+                                        tarihParts[0], // gün
+                                        saatParts[0], // saat
+                                        saatParts[1] // dakika
+                                    );
+                                    return (simdi - cagriZamani) < 10 * 60 * 1000;
+                                }
+                            }
+                            return false;
+                        } catch (e) {
+                            return false;
+                        }
                     }).reverse();
 
                     if (sonCagrilar.length === 0) {
@@ -341,7 +367,7 @@
                         return;
                     }
 
-                    // Garson çağrılarını göster (SARI KUTU)
+                    // Garson çağrılarını SARI KUTUDA göster
                     let html = '<div class="garson-cagri">';
                     html += '<h3><span>🛎️</span> Garson Çağrıları</h3>';
                     
@@ -365,6 +391,8 @@
             fetch('/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
+                    console.log('Siparişler:', siparisler);
+                    
                     // Yeni sipariş varsa SES ÇAL
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
                         document.getElementById('siparisSesi').play().catch(e => {});
@@ -377,7 +405,11 @@
                     const bugun = new Date().toDateString();
                     const bugunSiparis = siparisler.filter(s => {
                         if (!s.tarih) return false;
-                        return new Date(s.tarih).toDateString() === bugun;
+                        try {
+                            return new Date(s.tarih).toDateString() === bugun;
+                        } catch (e) {
+                            return false;
+                        }
                     }).length;
                     document.getElementById('bugunSiparis').textContent = bugunSiparis;
                     
