@@ -1,40 +1,368 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <title>Sipariş Paneli</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tilla Pastanesi - Admin Paneli</title>
     <style>
-        body { font-family: Arial; padding: 20px; }
-        .siparis { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f8f4f0;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #d2691e, #b85e1a);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .yenile-btn {
+            background: white;
+            color: #d2691e;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .yenile-btn:hover {
+            transform: scale(1.02);
+            background: #f0f0f0;
+        }
+
+        /* İstatistikler */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+            border-left: 4px solid #d2691e;
+        }
+
+        .stat-card .sayi {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #d2691e;
+        }
+
+        .stat-card .label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Siparişler */
+        .siparisler {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .siparis {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-left: 6px solid #d2691e;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .siparis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .masa-badge {
+            background: #d2691e;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zaman {
+            color: #888;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+            padding: 5px 12px;
+            border-radius: 50px;
+        }
+
+        .urunler {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .urun {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .urun:last-child {
+            border-bottom: none;
+        }
+
+        .urun-adi {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .urun-adet {
+            background: #d2691e20;
+            color: #d2691e;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+
+        .urun-fiyat {
+            font-weight: bold;
+            color: #d2691e;
+        }
+
+        .siparis-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f0e0d0;
+        }
+
+        .toplam {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #d2691e;
+        }
+
+        .durum {
+            background: #4caf50;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+
+        .yok {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            color: #888;
+            font-size: 1.1rem;
+            border: 2px dashed #ddd;
+        }
+
+        .yok span {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .header { flex-direction: column; text-align: center; }
+            .header h1 { font-size: 1.4rem; }
+            .yenile-btn { width: 100%; justify-content: center; }
+            .siparis-header { flex-direction: column; align-items: flex-start; }
+            .masa-badge { width: 100%; justify-content: center; }
+            .zaman { width: 100%; text-align: center; }
+            .siparis-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .toplam { width: 100%; }
+            .durum { width: 100%; text-align: center; }
+        }
     </style>
+    <!-- Ses -->
+    <audio id="siparisSesi" preload="auto" style="display: none;">
+        <source src="/ses/bildirimsesi.mp3" type="audio/mpeg">
+    </audio>
 </head>
 <body>
-    <h1>Siparişler</h1>
-    <button onclick="getir()">Yenile</button>
-    <div id="siparisler"></div>
+    <div class="header">
+        <h1>
+            <span>📋</span> 
+            Tilla Pastanesi - Sipariş Paneli
+        </h1>
+        <button class="yenile-btn" onclick="siparisleriGetir()">
+            <span>🔄</span> 
+            Yenile
+        </button>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="sayi" id="toplamSiparis">0</div>
+            <div class="label">Toplam Sipariş</div>
+        </div>
+        <div class="stat-card">
+            <div class="sayi" id="bugunSiparis">0</div>
+            <div class="label">Bugün</div>
+        </div>
+        <div class="stat-card">
+            <div class="sayi" id="bekleyenSiparis">0</div>
+            <div class="label">Bekleyen</div>
+        </div>
+    </div>
+
+    <!-- Siparişler -->
+    <div class="siparisler" id="siparisler">
+        <div class="yok"><span>🍰</span>Yükleniyor...</div>
+    </div>
 
     <script>
-        function getir() {
+        let oncekiSiparisSayisi = 0;
+
+        function siparisleriGetir() {
             fetch('/siparisler')
                 .then(res => res.json())
-                .then(data => {
+                .then(siparisler => {
+                    console.log('Gelen:', siparisler);
+                    
+                    // Yeni sipariş kontrolü
+                    if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
+                        document.getElementById('siparisSesi').play().catch(e => {});
+                    }
+                    oncekiSiparisSayisi = siparisler.length;
+
+                    // İstatistikler
+                    document.getElementById('toplamSiparis').textContent = siparisler.length;
+                    
+                    const bugun = new Date().toDateString();
+                    const bugunSiparis = siparisler.filter(s => 
+                        new Date(s.tarih).toDateString() === bugun
+                    ).length;
+                    document.getElementById('bugunSiparis').textContent = bugunSiparis;
+                    
+                    document.getElementById('bekleyenSiparis').textContent = 
+                        siparisler.filter(s => s.durum !== 'tamamlandı').length;
+
+                    // Siparişleri göster
+                    const container = document.getElementById('siparisler');
+                    
+                    if (siparisler.length === 0) {
+                        container.innerHTML = '<div class="yok"><span>🍰</span>Henüz sipariş yok</div>';
+                        return;
+                    }
+
                     let html = '';
-                    data.reverse().forEach(s => {
-                        html += '<div class="siparis">' + 
-                            'Masa: ' + (s.masa || '?') + '<br>' +
-                            'Tarih: ' + (s.tarih || '') + '<br>';
-                        if (s.urunler) {
-                            s.urunler.forEach(u => {
-                                html += u.urun + ' x ' + (u.adet || 1) + ' - ' + 
-                                        (u.fiyat * (u.adet || 1)) + ' TL<br>';
+                    siparisler.reverse().forEach((sip, index) => {
+                        let masaNo = sip.masa || 'Belirtilmemiş';
+                        let tarih = sip.tarih || '';
+                        
+                        let urunlerHtml = '';
+                        let toplam = 0;
+                        
+                        if (sip.urunler && sip.urunler.length > 0) {
+                            sip.urunler.forEach(u => {
+                                const urunAdi = u.urun || u.isim || 'Ürün';
+                                const fiyat = u.fiyat || 0;
+                                const adet = u.adet || 1;
+                                const araToplam = fiyat * adet;
+                                toplam += araToplam;
+                                
+                                urunlerHtml += `
+                                    <div class="urun">
+                                        <div>
+                                            <span class="urun-adi">${urunAdi}</span>
+                                            <span class="urun-adet">${adet} adet</span>
+                                        </div>
+                                        <span class="urun-fiyat">${araToplam} TL</span>
+                                    </div>
+                                `;
                             });
                         }
-                        html += '</div>';
+
+                        html += `
+                            <div class="siparis" style="animation-delay: ${index * 0.05}s">
+                                <div class="siparis-header">
+                                    <div class="masa-badge">
+                                        <span>📌</span> Masa ${masaNo}
+                                    </div>
+                                    <div class="zaman">
+                                        <span>⏰</span> ${tarih}
+                                    </div>
+                                </div>
+                                <div class="urunler">${urunlerHtml}</div>
+                                <div class="siparis-footer">
+                                    <div class="toplam">💰 Toplam: ${toplam} TL</div>
+                                    <div class="durum">✅ Yeni</div>
+                                </div>
+                            </div>
+                        `;
                     });
-                    document.getElementById('siparisler').innerHTML = html;
+                    
+                    container.innerHTML = html;
+                })
+                .catch(err => {
+                    console.log('Hata:', err);
                 });
         }
-        getir();
-        setInterval(getir, 3000);
+
+        // Her 3 saniyede bir yenile
+        siparisleriGetir();
+        setInterval(siparisleriGetir, 3000);
     </script>
 </body>
 </html>
