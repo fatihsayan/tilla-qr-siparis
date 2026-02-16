@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Sipariş Test</h1>
+    <pre id="sonuc"></pre>
+    <script>
+        fetch('/siparisler')
+            .then(res => res.text())
+            .then(data => document.getElementById('sonuc').innerHTML = data);
+    </script>
+</body>
+</html>

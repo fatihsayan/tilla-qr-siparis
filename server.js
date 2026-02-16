@@ -1,78 +1,43 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-// Public klasörünü statik olarak sun
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Ana sayfa
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Sipariş alma
+// Sipariş kaydet
 app.post('/siparis', (req, res) => {
-    const yeniSiparis = req.body;
-    yeniSiparis.tarih = new Date().toLocaleString('tr-TR');
-    yeniSiparis.id = Date.now().toString();
-
-    fs.readFile('orders.json', 'utf8', (err, data) => {
-        let siparisler = [];
-        if (!err && data) {
-            try {
-                siparisler = JSON.parse(data);
-            } catch (e) {
-                console.log('Parse hatası:', e);
-            }
+    const siparis = req.body;
+    siparis.tarih = new Date().toLocaleString('tr-TR');
+    
+    let siparisler = [];
+    try {
+        if (fs.existsSync('orders.json')) {
+            siparisler = JSON.parse(fs.readFileSync('orders.json'));
         }
-
-        siparisler.push(yeniSiparis);
-
-        fs.writeFile('orders.json', JSON.stringify(siparisler, null, 2), (err) => {
-            if (err) {
-                res.json({ basarili: false });
-            } else {
-                res.json({ basarili: true });
-            }
-        });
-    });
+    } catch (e) {}
+    
+    siparisler.push(siparis);
+    fs.writeFileSync('orders.json', JSON.stringify(siparisler, null, 2));
+    res.json({ basarili: true });
 });
 
 // Siparişleri getir
-app.get('/admin/siparisler', (req, res) => {
-    fs.readFile('orders.json', 'utf8', (err, data) => {
-        if (err) {
-            res.json([]);
+app.get('/siparisler', (req, res) => {
+    try {
+        if (fs.existsSync('orders.json')) {
+            const siparisler = JSON.parse(fs.readFileSync('orders.json'));
+            res.json(siparisler);
         } else {
-            try {
-                const siparisler = JSON.parse(data) || [];
-                res.json(siparisler.reverse());
-            } catch (e) {
-                res.json([]);
-            }
+            res.json([]);
         }
-    });
+    } catch (e) {
+        res.json([]);
+    }
 });
 
-// Health check - Render için gerekli
-app.get('/health', (req, res) => {
-    res.status(200).send('OK');
-});
-
-// 404 handler - basit versiyon
-app.use((req, res) => {
-    res.status(404).send('Sayfa bulunamadı');
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server çalışıyor: http://localhost:${PORT}`);
+app.listen(PORT, () => {
+    console.log(`Server ${PORT} portunda çalışıyor`);
 });
