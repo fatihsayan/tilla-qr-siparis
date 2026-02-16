@@ -19,7 +19,6 @@
             padding-bottom: 80px;
         }
 
-        /* HEADER */
         header {
             text-align: center;
             margin-bottom: 15px;
@@ -54,7 +53,6 @@
             margin-left: 5px;
         }
 
-        /* GARSON ÇAĞIR BUTONU */
         .garson-buton {
             text-align: center;
             margin: 15px 0;
@@ -89,7 +87,6 @@
             transform: none;
         }
 
-        /* KATEGORİ BAŞLIKLARI */
         .kategori-baslik {
             grid-column: 1/-1;
             margin: 20px 0 15px 0;
@@ -103,7 +100,6 @@
             display: inline-block;
         }
 
-        /* MENÜ GRID */
         .menu {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -111,7 +107,6 @@
             margin-bottom: 30px;
         }
 
-        /* MENÜ ÖĞESİ */
         .item {
             background: white;
             border-radius: 15px;
@@ -202,7 +197,6 @@
             background: #b85e1a;
         }
 
-        /* SEPET ALANI */
         .sepet-alani {
             background: white;
             border-radius: 20px 20px 0 0;
@@ -321,7 +315,6 @@
             cursor: not-allowed;
         }
 
-        /* TOAST BİLDİRİM */
         .toast {
             position: fixed;
             bottom: 80px;
@@ -361,7 +354,6 @@
         <h2>Masa No: <span id="masaNo">Yükleniyor...</span></h2>
     </header>
 
-    <!-- GARSON ÇAĞIR BUTONU -->
     <div class="garson-buton">
         <button onclick="garsonCagir()" id="garsonBtn">
             <span style="font-size: 1.5rem;">🛎️</span>
@@ -377,7 +369,6 @@
         </section>
     </main>
 
-    <!-- SEPET ALANI -->
     <div class="sepet-alani" id="sepetAlan">
         <div class="sepet-header" onclick="sepetToggle()">
             <h2>🛒 Sepetim</h2>
@@ -388,53 +379,53 @@
             <li style="text-align: center; color: #666; list-style: none;">Sepetiniz boş</li>
         </ul>
         
-        <div class="sepet-toplam" id="sepetToplam">Toplam: 0 TL</div>
+        <div class="sepet-toplam" id="sepetToplam">Toplam: 0 ₺</div>
         
         <button onclick="siparisGonder()" class="siparis-btn" id="siparisBtn">
             Siparişi Gönder
         </button>
     </div>
 
-    <!-- BİLDİRİM -->
     <div class="toast" id="toast"></div>
 
     <script>
-         // ========== MENÜ VERİSİ - KATEGORİLİ ==========
+        // MENÜ VERİSİ - DÜZENLENMİŞ
         const menu = [
-            // 🍰 TATLILAR
-            { id: 1, isim: "Şekerpare Porsiyon", fiyat: 70, kategori: "tatli", aciklama: "Şerbetli tatlı", resim: "images/sekerpare.jpg", emoji: "🍰" },
-            { id: 2, isim: "Gaziantep Baklavası Porsiyon", fiyat: 120, kategori: "tatli", aciklama: "Antep fıstıklı", resim: "images/baklava.jpg", emoji: "🍰" },
-            { id: 3, isim: "Tulumba Tatlısı Porsiyon", fiyat: 50, kategori: "tatli", aciklama: "Kızartma tatlı", resim: "images/tulumba.jpg", emoji: "🍰" },
-            { id: 4, isim: "Ekler Pasta Porsiyon", fiyat: 80, kategori: "tatli", aciklama: "Kremalı", resim: "images/ekler.jpg", emoji: "🍰" },
-            { id: 5, isim: "Baton Pasta Dilim", fiyat: 90, kategori: "tatli", aciklama: "Çikolata kaplı", resim: "images/baton.jpg", emoji: "🍰" },
-            { id: 6, isim: "Dubai Çikolatası", fiyat: 400, kategori: "tatli", aciklama: "Özel Dubai çikolatası", resim: "images/dubai.jpg", emoji: "🍰" },
-            { id: 7, isim: "Kurabiye Porsiyon", fiyat:100, kategori: "tatli", aciklama: "Tereyağlı kurabiye", resim: "images/kurabiye.jpg", emoji: "🍰" },
-            { id: 8, isim: "Kek Adet", fiyat: 50, kategori: "tatli", aciklama: "Ev yapımı kek", resim: "images/keks.jpg", emoji: "🍰" },
+            // TATLILAR
+            { id: 1, isim: "Şekerpare", fiyat: 70, kategori: "tatli", aciklama: "Şerbetli tatlı", emoji: "🍰", resim: "images/sekerpare.jpg" },
+            { id: 2, isim: "Gaziantep Baklavası", fiyat: 120, kategori: "tatli", aciklama: "Antep fıstıklı", emoji: "🍰", resim: "images/baklava.jpg" },
+            { id: 3, isim: "Tulumba", fiyat: 70, kategori: "tatli", aciklama: "Kızartma tatlı", emoji: "🍰", resim: "images/tulumba.jpg" },
+            { id: 4, isim: "Ekler", fiyat: 90, kategori: "tatli", aciklama: "Kremalı", emoji: "🍰", resim: "images/ekler.jpg" },
+            { id: 5, isim: "Baton", fiyat: 100, kategori: "tatli", aciklama: "Çikolata kaplı", emoji: "🍰", resim: "images/baton.jpg" },
+            { id: 6, isim: "Kır Pidesi", fiyat: 50, kategori: "tatli", aciklama: "Hindistan cevizli", emoji: "🍰", resim: "images/kirpidesi.jpg" },
+            { id: 7, isim: "Dubai Çikolatası", fiyat: 400, kategori: "tatli", aciklama: "Özel Dubai çikolatası", emoji: "🍰", resim: "images/dubai.jpg" },
+            { id: 8, isim: "Kurabiye", fiyat: 90, kategori: "tatli", aciklama: "Tereyağlı kurabiye", emoji: "🍰", resim: "images/kurabiye.jpg" },
+            { id: 9, isim: "Kek", fiyat: 50, kategori: "tatli", aciklama: "Ev yapımı kek", emoji: "🍰", resim: "images/keks.jpg" },
 
-            // 🥐 YİYECEKLER
-           { id: 9, isim: "Kır pidesi", fiyat: 50, kategori: "yiyecek", aciklama: "Kıymalı,Peynirli,Patatesli", resim: "images/kirpidesi.jpg", emoji: "🍰" },
-           {id: 10, isim: "Sarıyer Böreği", fiyat: 120, kategori: "tatli", aciklama: "Kıymalı,Peynirli,Patatesli", resim: "images/sariyer.jpg", emoji: "🍰" },
-            { id: 11, isim: "Simit", fiyat: 25, kategori: "yiyecek", aciklama: "Susamlı simit", resim: "images/simit.jpg", emoji: "🥐" },
-            { id: 12, isim: "Poğaça", fiyat: 20, kategori: "yiyecek", aciklama: "Peynirli,kıymalı,patatesli,zeytinli poğaça", resim: "images/pogaca.jpg", emoji: "🥐" },
-            { id: 13, isim: "Açma", fiyat: 20, kategori: "yiyecek", aciklama: "Yumuşacık açma", resim: "images/acma.jpg", emoji: "🥐" },
-            { id: 14, isim: "Çubuk", fiyat: 75, kategori: "yiyecek", aciklama: "Tuzlu çubuk kraker", resim: "images/cubuk.jpg", emoji: "🥐" },
+            // YİYECEKLER (Sarıyer Böreği buraya taşındı)
+            { id: 10, isim: "Sarıyer Böreği", fiyat: 120, kategori: "yiyecek", aciklama: "Tahinli", emoji: "🥐", resim: "images/sariyer.jpg" },
+            { id: 11, isim: "Simit", fiyat: 25, kategori: "yiyecek", aciklama: "Susamlı simit", emoji: "🥐", resim: "images/simit.jpg" },
+            { id: 12, isim: "Poğaça", fiyat: 20, kategori: "yiyecek", aciklama: "Peynirli poğaça", emoji: "🥐", resim: "images/pogaca.jpg" },
+            { id: 13, isim: "Açma", fiyat: 20, kategori: "yiyecek", aciklama: "Yumuşacık açma", emoji: "🥐", resim: "images/acma.jpg" },
+            { id: 14, isim: "Çubuk", fiyat: 60, kategori: "yiyecek", aciklama: "Tuzlu çubuk kraker", emoji: "🥐", resim: "images/cubuk.jpg" },
 
-            // 🥤 İÇECEKLER
-            { id: 21, isim: "Çay", fiyat: 30, kategori: "icecek", aciklama: "Demlik çay", resim: "images/cay.jpeg", emoji: "🥤" },
-            { id: 22, isim: "Kola", fiyat: 60, kategori: "icecek", aciklama: "Soğuk kola", resim: "images/kolaaa.jpg", emoji: "🥤" },
-            { id: 23, isim: "Meyve Suyu", fiyat: 40, kategori: "icecek", aciklama: "Şeftali/Portakal/Kayısı", resim: "images/meyvesuyuu.jpg", emoji: "🥤" },
-            { id: 24, isim: "Ayran", fiyat: 40, kategori: "icecek", aciklama: "Soğuk ayran", resim: "images/ayran.jpg", emoji: "🥤" },
-            { id: 25, isim: "Limonata", fiyat: 50, kategori: "icecek", aciklama: "Taze sıkım limonata", resim: "images/limonata.jpg", emoji: "🥤" }
+            // İÇECEKLER (Soda ve Türk Kahvesi eklendi)
+            { id: 21, isim: "Çay", fiyat: 30, kategori: "icecek", aciklama: "Demlik çay", emoji: "🥤", resim: "images/cay.jpg" },
+            { id: 22, isim: "Türk Kahvesi", fiyat: 80, kategori: "icecek", aciklama: "İsteğe bağlı şekerli", emoji: "☕", resim: "images/turkkahvesi.jpg" },
+            { id: 23, isim: "Kola", fiyat: 60, kategori: "icecek", aciklama: "Soğuk kola", emoji: "🥤", resim: "images/kolaaa.jpg" },
+            { id: 24, isim: "Soda", fiyat: 40, kategori: "icecek", aciklama: "Maden suyu", emoji: "💧", resim: "images/soda.jpg" },
+            { id: 25, isim: "Meyve Suyu", fiyat: 40, kategori: "icecek", aciklama: "Şeftali/Portakal/Kayısı", emoji: "🥤", resim: "images/meyvesuyuu.jpg" },
+            { id: 26, isim: "Ayran", fiyat: 40, kategori: "icecek", aciklama: "Soğuk ayran", emoji: "🥤", resim: "images/ayran.jpg" },
+            { id: 27, isim: "Limonata", fiyat: 50, kategori: "icecek", aciklama: "Taze sıkım limonata", emoji: "🍋", resim: "images/limonata.jpg" }
         ];
+
         let sepet = [];
         let sepetAcik = false;
 
-        // URL'den masa numarasını al
         const urlParams = new URLSearchParams(window.location.search);
         const masaNo = urlParams.get('masa') || '1';
         document.getElementById('masaNo').textContent = masaNo;
 
-        // GARSON ÇAĞIR FONKSİYONU
         window.garsonCagir = function() {
             const btn = document.getElementById('garsonBtn');
             
@@ -464,7 +455,6 @@
             });
         };
 
-        // MENÜYÜ GÖSTER
         function menuyuGoster() {
             const menuDiv = document.getElementById('menu');
             
@@ -501,7 +491,7 @@
                     <div class="emoji-kutu" style="display: none;">${urun.emoji}</div>
                     <h3>${urun.isim}</h3>
                     <p>${urun.aciklama || ''}</p>
-                    <div class="fiyat">${urun.fiyat} TL</div>
+                    <div class="fiyat">${urun.fiyat} ₺</div>
                     <button onclick="sepeteEkle(${urun.id})">Sepete Ekle</button>
                 </div>
             `;
@@ -543,7 +533,7 @@
             
             if (sepet.length === 0) {
                 sepetListe.innerHTML = '<li style="text-align: center; color: #666; list-style: none;">Sepetiniz boş</li>';
-                toplamSpan.innerHTML = 'Toplam: 0 TL';
+                toplamSpan.innerHTML = 'Toplam: 0 ₺';
                 document.getElementById('siparisBtn').disabled = true;
                 return;
             }
@@ -559,7 +549,7 @@
                     <li>
                         <div style="flex:1">
                             <div><strong>${urun.isim}</strong></div>
-                            <div style="font-size:0.8rem; color:#666;">${urun.fiyat} TL x ${urun.adet} = ${araToplam} TL</div>
+                            <div style="font-size:0.8rem; color:#666;">${urun.fiyat} ₺ x ${urun.adet} = ${araToplam} ₺</div>
                         </div>
                         <div class="sepet-urun-adet">
                             <button onclick="sepetMiktarDegistir(${urun.id}, 'azalt')">−</button>
@@ -571,7 +561,7 @@
             });
             
             sepetListe.innerHTML = html;
-            toplamSpan.innerHTML = `Toplam: ${toplam} TL`;
+            toplamSpan.innerHTML = `Toplam: ${toplam} ₺`;
             document.getElementById('siparisBtn').disabled = false;
         }
 
