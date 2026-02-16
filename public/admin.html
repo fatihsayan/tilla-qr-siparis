@@ -17,7 +17,6 @@
             padding: 20px;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, #d2691e, #b85e1a);
             color: white;
@@ -59,7 +58,6 @@
             background: #f0f0f0;
         }
 
-        /* İstatistikler */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -87,7 +85,6 @@
             margin-top: 5px;
         }
 
-        /* Siparişler */
         .siparisler {
             display: flex;
             flex-direction: column;
@@ -233,7 +230,6 @@
             .durum { width: 100%; text-align: center; }
         }
     </style>
-    <!-- Ses -->
     <audio id="siparisSesi" preload="auto" style="display: none;">
         <source src="/ses/bildirimsesi.mp3" type="audio/mpeg">
     </audio>
@@ -250,7 +246,6 @@
         </button>
     </div>
 
-    <!-- İstatistikler -->
     <div class="stats">
         <div class="stat-card">
             <div class="sayi" id="toplamSiparis">0</div>
@@ -266,7 +261,6 @@
         </div>
     </div>
 
-    <!-- Siparişler -->
     <div class="siparisler" id="siparisler">
         <div class="yok"><span>🍰</span>Yükleniyor...</div>
     </div>
@@ -290,9 +284,10 @@
                     document.getElementById('toplamSiparis').textContent = siparisler.length;
                     
                     const bugun = new Date().toDateString();
-                    const bugunSiparis = siparisler.filter(s => 
-                        new Date(s.tarih).toDateString() === bugun
-                    ).length;
+                    const bugunSiparis = siparisler.filter(s => {
+                        if (!s.tarih) return false;
+                        return new Date(s.tarih).toDateString() === bugun;
+                    }).length;
                     document.getElementById('bugunSiparis').textContent = bugunSiparis;
                     
                     document.getElementById('bekleyenSiparis').textContent = 
@@ -309,7 +304,27 @@
                     let html = '';
                     siparisler.reverse().forEach((sip, index) => {
                         let masaNo = sip.masa || 'Belirtilmemiş';
+                        
+                        // TARİH DÜZELTMESİ - BURASI ÖNEMLİ
                         let tarih = sip.tarih || '';
+                        if (tarih) {
+                            try {
+                                const date = new Date(tarih);
+                                if (!isNaN(date)) {
+                                    tarih = date.toLocaleString('tr-TR', { 
+                                        timeZone: 'Europe/Istanbul',
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit'
+                                    });
+                                }
+                            } catch (e) {
+                                console.log('Tarih hatası:', e);
+                            }
+                        }
                         
                         let urunlerHtml = '';
                         let toplam = 0;
