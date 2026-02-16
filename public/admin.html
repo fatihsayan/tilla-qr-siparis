@@ -65,21 +65,37 @@
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .garson-cagri h3 {
             margin-bottom: 10px;
             font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .cagri-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
+            padding: 10px;
             background: rgba(255,255,255,0.2);
             margin-bottom: 5px;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-weight: 500;
         }
 
         .stats {
@@ -296,14 +312,14 @@
         let oncekiSiparisSayisi = 0;
         let oncekiCagriSayisi = 0;
 
-        // Garson çağrılarını getir
+        // GARSON ÇAĞRILARINI GETİR (SADECE YAZI)
         function garsonCagrilariniGetir() {
             fetch('/garson-cagrilar')
                 .then(res => res.json())
                 .then(cagrilar => {
-                    // Yeni çağrı kontrolü
-                    if (oncekiCagriSayisi > 0 && cagrilar.length > oncekiCagriSayisi) {
-                        document.getElementById('siparisSesi').play().catch(e => {});
+                    // Yeni çağrı varsa sayfada göster (ses YOK)
+                    if (cagrilar.length > oncekiCagriSayisi) {
+                        // Sadece ekrana düşsün, ses yok
                     }
                     oncekiCagriSayisi = cagrilar.length;
 
@@ -312,12 +328,12 @@
                         return;
                     }
 
-                    // Son 5 dakikadaki çağrıları göster
+                    // Son 10 dakikadaki çağrıları göster
                     const simdi = new Date();
                     const sonCagrilar = cagrilar.filter(c => {
                         const tarihStr = c.zaman.split(' ').reverse().join(' ');
                         const cagriZamani = new Date(tarihStr);
-                        return (simdi - cagriZamani) < 5 * 60 * 1000;
+                        return (simdi - cagriZamani) < 10 * 60 * 1000; // 10 dakika
                     }).reverse();
 
                     if (sonCagrilar.length === 0) {
@@ -325,33 +341,37 @@
                         return;
                     }
 
+                    // Garson çağrılarını göster (SARI KUTU)
                     let html = '<div class="garson-cagri">';
-                    html += '<h3>🛎️ Garson Çağrıları</h3>';
+                    html += '<h3><span>🛎️</span> Garson Çağrıları</h3>';
                     
                     sonCagrilar.forEach(c => {
                         html += `
                             <div class="cagri-item">
-                                <span><strong>Masa ${c.masa}</strong></span>
-                                <span>${c.zaman}</span>
+                                <span><strong>📌 Masa ${c.masa}</strong></span>
+                                <span>⏰ ${c.zaman}</span>
                             </div>
                         `;
                     });
                     
                     html += '</div>';
                     document.getElementById('garsonCagriBolumu').innerHTML = html;
-                });
+                })
+                .catch(err => console.log('Garson çağrı hatası:', err));
         }
 
-        // Siparişleri getir
+        // SİPARİŞLERİ GETİR (SESLİ)
         function siparisleriGetir() {
             fetch('/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
+                    // Yeni sipariş varsa SES ÇAL
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
                         document.getElementById('siparisSesi').play().catch(e => {});
                     }
                     oncekiSiparisSayisi = siparisler.length;
 
+                    // İstatistikler
                     document.getElementById('toplamSiparis').textContent = siparisler.length;
                     
                     const bugun = new Date().toDateString();
@@ -364,6 +384,7 @@
                     document.getElementById('bekleyenSiparis').textContent = 
                         siparisler.filter(s => s.durum !== 'tamamlandı').length;
 
+                    // Siparişleri listele
                     const container = document.getElementById('siparisler');
                     
                     if (siparisler.length === 0) {
@@ -375,6 +396,7 @@
                     siparisler.reverse().forEach((sip, index) => {
                         let masaNo = sip.masa || 'Belirtilmemiş';
                         
+                        // Tarih düzeltmesi
                         let tarih = sip.tarih || '';
                         if (tarih) {
                             try {
@@ -392,6 +414,7 @@
                             } catch (e) {}
                         }
                         
+                        // Ürünleri listele
                         let urunlerHtml = '';
                         let toplam = 0;
                         
@@ -436,16 +459,16 @@
                     
                     container.innerHTML = html;
                 })
-                .catch(err => console.log('Hata:', err));
+                .catch(err => console.log('Sipariş hatası:', err));
         }
 
-        // Tümünü getir
+        // TÜMÜNÜ GETİR
         function tumunuGetir() {
             siparisleriGetir();
             garsonCagrilariniGetir();
         }
 
-        // Her 3 saniyede bir yenile
+        // SAYFA YÜKLENİNCE VE 3 SANİYEDE BİR ÇALIŞTIR
         tumunuGetir();
         setInterval(tumunuGetir, 3000);
     </script>
