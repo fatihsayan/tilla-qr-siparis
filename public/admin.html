@@ -77,7 +77,7 @@
 
         .masa-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
         }
 
@@ -87,7 +87,6 @@
             padding: 15px;
             border-left: 4px solid #4caf50;
             position: relative;
-            cursor: pointer;
             transition: all 0.2s;
         }
 
@@ -151,7 +150,42 @@
             font-weight: bold;
             color: #d2691e;
             margin-top: 8px;
-            font-size: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .masa-islemler {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .masa-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .masa-btn.hesap {
+            background: #d2691e;
+            color: white;
+        }
+
+        .masa-btn.hesap:hover {
+            background: #b85e1a;
+        }
+
+        .masa-btn.kapat {
+            background: #dc3545;
+            color: white;
+        }
+
+        .masa-btn.kapat:hover {
+            background: #c82333;
         }
 
         /* HESAP MODAL */
@@ -219,8 +253,14 @@
             margin-top: 2px;
         }
 
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
         .modal-close {
-            background: #d2691e;
+            background: #6c757d;
             color: white;
             border: none;
             padding: 12px 25px;
@@ -228,12 +268,27 @@
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
+            flex: 1;
         }
 
         .modal-close:hover {
-            background: #b85e1a;
+            background: #5a6268;
+        }
+
+        .modal-kapat {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .modal-kapat:hover {
+            background: #c82333;
         }
 
         .garson-cagri {
@@ -472,7 +527,7 @@
 
     <!-- MASA DURUMLARI -->
     <div class="masa-durumlari" id="masaDurumlari">
-        <h2><span>🪑</span> Masa Durumları (Tıklayınca Hesabı Gör)</h2>
+        <h2><span>🪑</span> Masa Durumları</h2>
         <div class="masa-grid" id="masaGrid">
             <!-- JavaScript ile doldurulacak -->
         </div>
@@ -484,7 +539,10 @@
             <h2 id="modalBaslik">Masa Hesabı</h2>
             <div id="modalUrunler"></div>
             <div id="modalToplam" class="modal-toplam"></div>
-            <button class="modal-close" onclick="modalKapat()">Kapat</button>
+            <div class="modal-actions">
+                <button class="modal-close" onclick="modalKapat()">Kapat</button>
+                <button class="modal-kapat" id="modalMasayiKapat" onclick="modalMasayiKapat()">Masayı Kapat ve Boşalt</button>
+            </div>
         </div>
     </div>
 
@@ -513,6 +571,46 @@
         let oncekiSiparisSayisi = 0;
         let oncekiCagriSayisi = 0;
         let tumSiparisler = [];
+        let aktifMasa = null;
+
+        // Masa toplamlarını hesapla (TÜM SİPARİŞLERİ TOPLA)
+        function masaToplaminiHesapla(masaNo) {
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
+            let toplam = 0;
+            
+            masaSiparisleri.forEach(siparis => {
+                if (siparis.urunler && siparis.urunler.length > 0) {
+                    siparis.urunler.forEach(u => {
+                        const fiyat = u.fiyat || 0;
+                        const adet = u.adet || 1;
+                        toplam += fiyat * adet;
+                    });
+                }
+            });
+            
+            return toplam;
+        }
+
+        // Masa ürün özetini hesapla (TÜM SİPARİŞLERİ BİRLEŞTİR)
+        function masaUrunOzetiniHesapla(masaNo) {
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
+            let tumUrunler = [];
+            
+            masaSiparisleri.forEach(siparis => {
+                if (siparis.urunler && siparis.urunler.length > 0) {
+                    siparis.urunler.forEach(u => {
+                        tumUrunler.push(u.urun || u.isim || 'Ürün');
+                    });
+                }
+            });
+            
+            // İlk 3 ürünü göster
+            const ilkUc = tumUrunler.slice(0, 3);
+            let ozet = ilkUc.join(', ');
+            if (tumUrunler.length > 3) ozet += '...';
+            
+            return ozet;
+        }
 
         // Masa durumlarını getir
         function masaDurumlariniGetir() {
@@ -528,24 +626,14 @@
                         const masa = durumlar[i];
                         if (masa.durum === 'dolu') doluMasaSayisi++;
                         
-                        // Bu masaya ait siparişleri bul
-                        const masaSiparisleri = tumSiparisler.filter(s => s.masa == i);
-                        const sonSiparis = masaSiparisleri.length > 0 ? masaSiparisleri[masaSiparisleri.length - 1] : null;
+                        // TOPLAM TUTARI HESAPLA (TÜM SİPARİŞLER)
+                        const toplamTutar = masaToplaminiHesapla(i);
                         
-                        // Ürün özeti
-                        let urunOzet = '';
-                        let toplamTutar = 0;
-                        
-                        if (sonSiparis && sonSiparis.urunler) {
-                            const urunler = sonSiparis.urunler.slice(0, 2);
-                            urunOzet = urunler.map(u => u.urun).join(', ');
-                            if (sonSiparis.urunler.length > 2) urunOzet += '...';
-                            
-                            toplamTutar = sonSiparis.toplam || 0;
-                        }
+                        // ÜRÜN ÖZETİNİ HESAPLA (TÜM SİPARİŞLER)
+                        const urunOzet = masaUrunOzetiniHesapla(i);
                         
                         html += `
-                            <div class="masa-kart ${masa.durum}" onclick="masaHesabiGoster(${i})">
+                            <div class="masa-kart ${masa.durum}">
                                 <div class="masa-numarasi">
                                     <span>Masa ${i}</span>
                                     <span class="masa-durum-badge ${masa.durum}">
@@ -562,7 +650,15 @@
                                         </div>
                                     ` : ''}
                                     <div class="masa-toplam">
-                                        💰 ${toplamTutar} TL
+                                        💰 TOPLAM: ${toplamTutar} TL
+                                    </div>
+                                    <div class="masa-islemler">
+                                        <button class="masa-btn hesap" onclick="masaHesabiGoster(${i})">
+                                            📋 Hesap Detay
+                                        </button>
+                                        <button class="masa-btn kapat" onclick="masaKapat(${i})">
+                                            🗑️ Masayı Kapat
+                                        </button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -574,8 +670,9 @@
                 });
         }
 
-        // Masa hesabını göster
+        // Masa hesabını göster (TÜM SİPARİŞLERİ BİRLEŞTİR)
         window.masaHesabiGoster = function(masaNo) {
+            aktifMasa = masaNo;
             const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             
             if (masaSiparisleri.length === 0) {
@@ -583,47 +680,84 @@
                 return;
             }
             
-            // En son siparişi al
-            const sonSiparis = masaSiparisleri[masaSiparisleri.length - 1];
-            
             // Modal başlığını güncelle
-            document.getElementById('modalBaslik').innerHTML = `<span>📋</span> Masa ${masaNo} Hesabı`;
+            document.getElementById('modalBaslik').innerHTML = `<span>📋</span> Masa ${masaNo} Hesabı (Tüm Siparişler)`;
             
-            // Ürünleri listele
+            // TÜM SİPARİŞLERİ TEK LİSTEDE GÖSTER
             let urunlerHtml = '';
             let toplam = 0;
+            let siparisNo = 1;
             
-            if (sonSiparis.urunler && sonSiparis.urunler.length > 0) {
-                sonSiparis.urunler.forEach(u => {
-                    const urunAdi = u.urun || u.isim || 'Ürün';
-                    const fiyat = u.fiyat || 0;
-                    const adet = u.adet || 1;
-                    const not = u.not || '';
-                    const araToplam = fiyat * adet;
-                    toplam += araToplam;
+            masaSiparisleri.forEach(siparis => {
+                if (siparis.urunler && siparis.urunler.length > 0) {
+                    urunlerHtml += `<div style="margin-top: 10px; font-weight: bold; color: #d2691e;">Sipariş #${siparisNo}</div>`;
                     
-                    urunlerHtml += `
-                        <div class="modal-urun">
-                            <div>
-                                <strong>${urunAdi}</strong> x ${adet}
-                                ${not ? `<div class="modal-not">📝 ${not}</div>` : ''}
+                    siparis.urunler.forEach(u => {
+                        const urunAdi = u.urun || u.isim || 'Ürün';
+                        const fiyat = u.fiyat || 0;
+                        const adet = u.adet || 1;
+                        const not = u.not || '';
+                        const araToplam = fiyat * adet;
+                        toplam += araToplam;
+                        
+                        urunlerHtml += `
+                            <div class="modal-urun">
+                                <div>
+                                    <strong>${urunAdi}</strong> x ${adet}
+                                    ${not ? `<div class="modal-not">📝 ${not}</div>` : ''}
+                                </div>
+                                <span>${araToplam} TL</span>
                             </div>
-                            <span>${araToplam} TL</span>
-                        </div>
-                    `;
-                });
-            }
+                        `;
+                    });
+                    
+                    siparisNo++;
+                }
+            });
             
             document.getElementById('modalUrunler').innerHTML = urunlerHtml;
-            document.getElementById('modalToplam').innerHTML = `Toplam: ${toplam} TL`;
+            document.getElementById('modalToplam').innerHTML = `GENEL TOPLAM: ${toplam} TL`;
             
             // Modalı göster
             document.getElementById('hesapModal').classList.add('active');
         };
 
+        // Masayı kapat (ÇALIŞAN VERSİYON)
+        window.masaKapat = function(masaNo) {
+            if (confirm(`Masa ${masaNo}'ı kapatmak ve boşaltmak istediğinize emin misiniz?`)) {
+                fetch('/masa-bosalt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ masaNo: masaNo })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.basarili) {
+                        alert(`✅ Masa ${masaNo} başarıyla kapatıldı.`);
+                        tumunuGetir(); // Sayfayı yenile
+                    } else {
+                        alert('❌ Bir hata oluştu!');
+                    }
+                })
+                .catch(err => {
+                    console.error('Hata:', err);
+                    alert('❌ Sunucu hatası!');
+                });
+            }
+        };
+
+        // Modaldan masayı kapat
+        window.modalMasayiKapat = function() {
+            if (aktifMasa) {
+                masaKapat(aktifMasa);
+                modalKapat();
+            }
+        };
+
         // Modal kapat
         window.modalKapat = function() {
             document.getElementById('hesapModal').classList.remove('active');
+            aktifMasa = null;
         };
 
         // Modal dışına tıklayınca kapat
@@ -631,6 +765,7 @@
             const modal = document.getElementById('hesapModal');
             if (event.target == modal) {
                 modal.classList.remove('active');
+                aktifMasa = null;
             }
         };
 
