@@ -552,9 +552,9 @@
             <div class="alt-deger" id="toplamSiparisSayisi">0 sipariş</div>
         </div>
         <div class="rapor-kart">
-            <div class="baslik"><span>📅</span> Bugünkü Ciro</div>
-            <div class="deger" id="bugunCiro">0 ₺</div>
-            <div class="alt-deger" id="bugunSiparisSayisi">0 sipariş</div>
+            <div class="baslik"><span>📅</span> Aylık Ciro</div>
+            <div class="deger" id="aylikCiro">0 ₺</div>
+            <div class="alt-deger" id="aylikSiparisSayisi">0 sipariş</div>
         </div>
         <div class="rapor-kart">
             <div class="baslik"><span>📊</span> Ortalama Sipariş</div>
@@ -644,16 +644,20 @@
             return toplam;
         }
 
-        // BUGÜNKÜ CIRO HESAPLA
-        function bugunCiroHesapla() {
-            const bugun = new Date().toDateString();
+        // AYLIK CIRO HESAPLA
+        function aylikCiroHesapla() {
+            const simdi = new Date();
+            const ay = simdi.getMonth();
+            const yil = simdi.getFullYear();
+            
             let toplam = 0;
             let sayac = 0;
             
             tumSiparisler.forEach(siparis => {
                 if (!siparis.tarih) return;
                 try {
-                    if (new Date(siparis.tarih).toDateString() === bugun) {
+                    const tarih = new Date(siparis.tarih);
+                    if (tarih.getMonth() === ay && tarih.getFullYear() === yil) {
                         sayac++;
                         if (siparis.toplam) {
                             toplam += siparis.toplam;
@@ -760,9 +764,9 @@
             document.getElementById('toplamCiro').textContent = toplamCiro.toLocaleString('tr-TR') + ' ₺';
             document.getElementById('toplamSiparisSayisi').textContent = tumSiparisler.length + ' sipariş';
             
-            const bugun = bugunCiroHesapla();
-            document.getElementById('bugunCiro').textContent = bugun.toplam.toLocaleString('tr-TR') + ' ₺';
-            document.getElementById('bugunSiparisSayisi').textContent = bugun.sayac + ' sipariş';
+            const aylik = aylikCiroHesapla();
+            document.getElementById('aylikCiro').textContent = aylik.toplam.toLocaleString('tr-TR') + ' ₺';
+            document.getElementById('aylikSiparisSayisi').textContent = aylik.sayac + ' sipariş';
             
             document.getElementById('ortalamaSiparis').textContent = ortalamaHesapla().toLocaleString('tr-TR') + ' ₺';
             document.getElementById('enCokSiparis').textContent = 'En çok: ' + enCokSiparisUrun();
@@ -972,9 +976,9 @@
             document.getElementById('hesapModal').classList.add('active');
         };
 
-        // MASAYI TAMAMEN SIFIRLA
+        // MASAYI SIFIRLA (SADECE DURUM, SİPARİŞLER KALSIN)
         window.masaSifirla = function(masaNo) {
-            if (confirm(`⚠️ Masa ${masaNo}'daki TÜM SİPARİŞLER SİLİNECEK!\n\nBu işlem geri alınamaz. Devam etmek istediğinize emin misiniz?`)) {
+            if (confirm(`Masa ${masaNo}'ı boşaltmak istediğinize emin misiniz? (Siparişler raporda kalacak)`)) {
                 fetch('/masa-sifirla', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -983,7 +987,7 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.basarili) {
-                        alert(`✅ Masa ${masaNo} tamamen sıfırlandı!`);
+                        alert(`✅ Masa ${masaNo} boşaltıldı! Siparişler raporda kaldı.`);
                         tumunuGetir();
                     } else {
                         alert('❌ Bir hata oluştu!');
