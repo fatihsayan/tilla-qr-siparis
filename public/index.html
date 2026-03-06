@@ -35,22 +35,52 @@
             font-weight: 600;
         }
 
-        header h2 {
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            font-weight: 400;
-            background: rgba(255,255,255,0.2);
-            display: inline-block;
-            padding: 5px 20px;
-            border-radius: 50px;
+        .masa-secim-alani {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        #masaNo {
+        .masa-dropdown {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .masa-dropdown select {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1rem;
             font-weight: bold;
             background: white;
             color: #d2691e;
-            padding: 3px 10px;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .masa-dropdown span {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+
+        .masa-dropdown span strong {
+            background: white;
+            color: #d2691e;
+            padding: 2px 8px;
             border-radius: 20px;
             margin-left: 5px;
+        }
+
+        .masa-bilgi {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
         }
 
         .garson-buton {
@@ -154,6 +184,7 @@
             min-height: 2.4em;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -167,6 +198,7 @@
             min-height: 2.6em;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -351,7 +383,28 @@
 
     <header>
         <h1>🍰 Tilla Pastanesi</h1>
-        <h2>Masa No: <span id="masaNo">Yükleniyor...</span></h2>
+        <div class="masa-secim-alani">
+            <div class="masa-dropdown">
+                <select id="masaSecici">
+                    <option value="1">Masa 1</option>
+                    <option value="2">Masa 2</option>
+                    <option value="3">Masa 3</option>
+                    <option value="4">Masa 4</option>
+                    <option value="5">Masa 5</option>
+                    <option value="6">Masa 6</option>
+                    <option value="7">Masa 7</option>
+                    <option value="8">Masa 8</option>
+                    <option value="9">Masa 9</option>
+                    <option value="10">Masa 10</option>
+                </select>
+                <span>
+                    Seçili: <strong id="masaNo">1</strong>
+                </span>
+            </div>
+            <div class="masa-bilgi">
+                ⓘ Yukarıdan masa numaranızı seçin veya QR kod okutun
+            </div>
+        </div>
     </header>
 
     <div class="garson-buton">
@@ -389,46 +442,60 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // MENÜ VERİSİ - SON DÜZENLEME
-const menu = [
-    // TATLILAR (Kırpidöşi kaldırıldı)
-    { id: 1, isim: "Şekerpare Porsiyon(4 Adet)", fiyat: 70, kategori: "tatli", aciklama: "Şerbetli tatlı", emoji: "🍰", resim: "images/sekerpare.jpg" },
-    { id: 2, isim: "Gaziantep Baklavası Porsiyon(4 Adet)", fiyat: 120, kategori: "tatli", aciklama: "Cevizli Antep Baklavası", emoji: "🍰", resim: "images/baklava.jpg" },
-    { id: 3, isim: "Tulumba Tatlısı Porsiyon", fiyat: 70, kategori: "tatli", aciklama: "Şerbetli Tatlı", emoji: "🍰", resim: "images/tulumba.jpg" },
-    { id: 4, isim: "Ekler Pasta Porsiyon", fiyat: 90, kategori: "tatli", aciklama: "Kremalı", emoji: "🍰", resim: "images/ekler.jpg" },
-    { id: 5, isim: "Baton Pasta Dilim", fiyat: 100, kategori: "tatli", aciklama: "Çikolata kaplı", emoji: "🍰", resim: "images/baton.jpg" },
-    { id: 6, isim: "Dubai Çikolatası", fiyat: 400, kategori: "tatli", aciklama: "Özel Dubai çikolatası", emoji: "🍰", resim: "images/dubai.jpg" },
-    { id: 7, isim: "Kurabiye Porsiyon", fiyat: 90, kategori: "tatli", aciklama: "Tereyağlı kurabiye", emoji: "🍰", resim: "images/kurabiye.jpg" },
-    { id: 8, isim: "Kek Adet", fiyat: 60, kategori: "tatli", aciklama: "Özel Çikolatalı kek", emoji: "🍰", resim: "images/kek.jpg" },
+        // MENÜ VERİSİ
+        const menu = [
+            // TATLILAR
+            { id: 1, isim: "Şekerpare", fiyat: 60, kategori: "tatli", aciklama: "Şerbetli tatlı", emoji: "🍰", resim: "images/sekerpare.jpg" },
+            { id: 2, isim: "Gaziantep Baklavası", fiyat: 120, kategori: "tatli", aciklama: "Antep fıstıklı", emoji: "🍰", resim: "images/baklava.jpg" },
+            { id: 3, isim: "Tulumba", fiyat: 50, kategori: "tatli", aciklama: "Kızartma tatlı", emoji: "🍰", resim: "images/tulumba.jpg" },
+            { id: 4, isim: "Ekler", fiyat: 80, kategori: "tatli", aciklama: "Kremalı", emoji: "🍰", resim: "images/ekler.jpg" },
+            { id: 5, isim: "Baton", fiyat: 90, kategori: "tatli", aciklama: "Çikolata kaplı", emoji: "🍰", resim: "images/baton.jpg" },
+            { id: 6, isim: "Dubai Çikolatası", fiyat: 150, kategori: "tatli", aciklama: "Özel Dubai çikolatası", emoji: "🍰", resim: "images/dubai.jpg" },
+            { id: 7, isim: "Kurabiye", fiyat: 30, kategori: "tatli", aciklama: "Tereyağlı kurabiye", emoji: "🍰", resim: "images/kurabiye.jpg" },
+            { id: 8, isim: "Kek", fiyat: 40, kategori: "tatli", aciklama: "Ev yapımı kek", emoji: "🍰", resim: "images/kek.jpg" },
 
-    // YİYECEKLER (Sarıyer Böreği ve Kır pidesi burada)
-    { id: 9, isim: "Sarıyer Böreği Porsiyon(250 Gr.)", fiyat: 120, kategori: "yiyecek", aciklama: "Kıymalı,Peynirli,Patatesli Sarıyer Böreği", emoji: "🥐", resim: "images/sariyer.jpg" },
-    { id: 10, isim: "Kır Pidesi Adet", fiyat: 50, kategori: "yiyecek", aciklama: "Kıymalı,Peynirli,Patatesli Kastamonu Kır Pidesi", emoji: "🥐", resim: "images/kirpidesi.jpg" },
-    { id: 11, isim: "Simit Adet", fiyat: 25, kategori: "yiyecek", aciklama: "Susamlı,Terayağlı simit", emoji: "🥐", resim: "images/simit.jpg" },
-    { id: 12, isim: "Poğaça Adet", fiyat: 20, kategori: "yiyecek", aciklama: "Peynirli ,Kıymalı ,Patatesli,poğaça", emoji: "🥐", resim: "images/pogaca.jpg" },
-    { id: 13, isim: "Açma Adet", fiyat: 20, kategori: "yiyecek", aciklama: "Yumuşacık açma", emoji: "🥐", resim: "images/acma.jpg" },
-    { id: 14, isim: "Çubuk Porsiyon", fiyat: 60, kategori: "yiyecek", aciklama: "Tuzlu çıtır çubuk ", emoji: "🥐", resim: "images/cubuk.jpg" },
+            // YİYECEKLER
+            { id: 9, isim: "Sarıyer Böreği", fiyat: 70, kategori: "yiyecek", aciklama: "Tahinli", emoji: "🥐", resim: "images/sariyer.jpg" },
+            { id: 10, isim: "Kır Pidesi", fiyat: 80, kategori: "yiyecek", aciklama: "Kıymalı/peynirli", emoji: "🥐", resim: "images/kirpidesi.jpg" },
+            { id: 11, isim: "Simit", fiyat: 25, kategori: "yiyecek", aciklama: "Susamlı simit", emoji: "🥐", resim: "images/simit.jpg" },
+            { id: 12, isim: "Poğaça", fiyat: 20, kategori: "yiyecek", aciklama: "Peynirli poğaça", emoji: "🥐", resim: "images/pogaca.jpg" },
+            { id: 13, isim: "Açma", fiyat: 20, kategori: "yiyecek", aciklama: "Yumuşacık açma", emoji: "🥐", resim: "images/acma.jpg" },
+            { id: 14, isim: "Çubuk", fiyat: 15, kategori: "yiyecek", aciklama: "Tuzlu çubuk kraker", emoji: "🥐", resim: "images/cubuk.jpg" },
 
-    // İÇECEKLER
-   // İÇECEKLER
-{ id: 21, isim: "Çay", fiyat: 30, kategori: "icecek", aciklama: "Demlik çay", emoji: "🥤", resim: "images/cay.jpeg" },
-{ id: 22, isim: "Türk Kahvesi", fiyat: 85, kategori: "icecek", aciklama: "İsteğe bağlı şekerli", emoji: "☕", resim: "images/kahve.jpg" },
-{ id: 23, isim: "Kola", fiyat: 60, kategori: "icecek", aciklama: "Soğuk kola", emoji: "🥤", resim: "images/kolaaa.jpg" },
-{ id: 24, isim: "Soda", fiyat: 40, kategori: "icecek", aciklama: "Maden suyu", emoji: "💧", resim: "images/soda.jpg" },
-{ id: 25, isim: "Meyve Suyu", fiyat: 40, kategori: "icecek", aciklama: "Şeftali/Portakal/Kayısı", emoji: "🥤", resim: "images/meyvesuyuu.jpg" },
-{ id: 26, isim: "Ayran", fiyat: 40, kategori: "icecek", aciklama: "Soğuk ayran", emoji: "🥤", resim: "images/ayran.jpg" },
-{ id: 27, isim: "Limonata", fiyat: 50, kategori: "icecek", aciklama: "Taze sıkım limonata", emoji: "🍋", resim: "images/limonata.jpg" },
-{ id: 28, isim: "Su", fiyat: 20, kategori: "icecek", aciklama: "Su", emoji: "💧", resim: "images/su.jpg" }
-]; // <--- Buraya dikkat! Son satırda noktalı virgül yok
+            // İÇECEKLER
+            { id: 21, isim: "Çay", fiyat: 30, kategori: "icecek", aciklama: "Demlik çay", emoji: "🥤", resim: "images/cay.jpeg" },
+            { id: 22, isim: "Türk Kahvesi", fiyat: 85, kategori: "icecek", aciklama: "İsteğe bağlı şekerli", emoji: "☕", resim: "images/kahve.jpg" },
+            { id: 23, isim: "Kola", fiyat: 60, kategori: "icecek", aciklama: "Soğuk kola", emoji: "🥤", resim: "images/kola.jpg" },
+            { id: 24, isim: "Soda", fiyat: 40, kategori: "icecek", aciklama: "Maden suyu", emoji: "💧", resim: "images/soda.jpg" },
+            { id: 25, isim: "Meyve Suyu", fiyat: 40, kategori: "icecek", aciklama: "Şeftali/Portakal/Kayısı", emoji: "🥤", resim: "images/meyvesuyu.jpg" },
+            { id: 26, isim: "Ayran", fiyat: 40, kategori: "icecek", aciklama: "Soğuk ayran", emoji: "🥤", resim: "images/ayran.jpg" },
+            { id: 27, isim: "Limonata", fiyat: 50, kategori: "icecek", aciklama: "Taze sıkım limonata", emoji: "🍋", resim: "images/limonata.jpg" },
+            { id: 28, isim: "Su", fiyat: 20, kategori: "icecek", aciklama: "Su", emoji: "💧", resim: "images/su.jpg" }
+        ];
+
         let sepet = [];
         let sepetAcik = false;
 
+        // URL'den masa numarasını al veya varsayılan 1
         const urlParams = new URLSearchParams(window.location.search);
-        const masaNo = urlParams.get('masa') || '1';
-        document.getElementById('masaNo').textContent = masaNo;
+        let masaNo = urlParams.get('masa') || '1';
 
+        // Masa seçiciyi ayarla
+        document.getElementById('masaNo').textContent = masaNo;
+        document.getElementById('masaSecici').value = masaNo;
+
+        // Masa değişince URL'i güncelle (sayfa yenilenir)
+        document.getElementById('masaSecici').addEventListener('change', function() {
+            const yeniMasa = this.value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('masa', yeniMasa);
+            window.location.href = url.toString(); // Sayfa yenilenir ve yeni masaya göre menü gelir
+        });
+
+        // Garson çağır
         window.garsonCagir = function() {
             const btn = document.getElementById('garsonBtn');
+            const masaNo = document.getElementById('masaNo').textContent;
             
             fetch('/garson-cagir', {
                 method: 'POST',
@@ -573,7 +640,7 @@ const menu = [
             }
 
             const siparis = {
-                masa: masaNo,
+                masa: document.getElementById('masaNo').textContent,
                 urunler: sepet.map(u => ({
                     urun: u.isim,
                     fiyat: u.fiyat,
