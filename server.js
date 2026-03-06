@@ -26,8 +26,11 @@ app.post('/siparis', (req, res) => {
     siparisler.push(siparis);
     fs.writeFileSync('orders.json', JSON.stringify(siparisler, null, 2));
     
-    // Masa durumunu güncelle (masa artık dolu)
-    masaDurumuGuncelle(siparis.masa, 'dolu');
+    // Masa durumunu güncelle
+    if (masaDurumlari[siparis.masa]) {
+        masaDurumlari[siparis.masa].durum = 'dolu';
+        masaDurumlari[siparis.masa].baslangic = new Date();
+    }
     
     res.json({ basarili: true });
 });
@@ -83,36 +86,59 @@ app.get('/garson-cagrilar', (req, res) => {
     }
 });
 
+// Hesap iste
+app.post('/hesap-iste', (req, res) => {
+    const masaNo = req.body.masa || 'Belirtilmemiş';
+    const zaman = new Date().toLocaleString('tr-TR');
+    
+    let hesaplar = [];
+    try {
+        if (fs.existsSync('hesaplar.json')) {
+            hesaplar = JSON.parse(fs.readFileSync('hesaplar.json'));
+        }
+    } catch (e) {}
+    
+    hesaplar.push({
+        masa: masaNo,
+        zaman: zaman,
+        id: Date.now().toString(),
+        durum: 'bekliyor'
+    });
+    
+    fs.writeFileSync('hesaplar.json', JSON.stringify(hesaplar, null, 2));
+    res.json({ basarili: true });
+});
+
+// Hesap isteklerini getir
+app.get('/hesap-istekleri', (req, res) => {
+    try {
+        if (fs.existsSync('hesaplar.json')) {
+            const hesaplar = JSON.parse(fs.readFileSync('hesaplar.json'));
+            res.json(hesaplar);
+        } else {
+            res.json([]);
+        }
+    } catch (e) {
+        res.json([]);
+    }
+});
+
 // Masa durumları
 let masaDurumlari = {
-    1: { durum: 'boş', baslangic: null, sure: 0 },
-    2: { durum: 'boş', baslangic: null, sure: 0 },
-    3: { durum: 'boş', baslangic: null, sure: 0 },
-    4: { durum: 'boş', baslangic: null, sure: 0 },
-    5: { durum: 'boş', baslangic: null, sure: 0 },
-    6: { durum: 'boş', baslangic: null, sure: 0 },
-    7: { durum: 'boş', baslangic: null, sure: 0 },
-    8: { durum: 'boş', baslangic: null, sure: 0 },
-    9: { durum: 'boş', baslangic: null, sure: 0 },
-    10: { durum: 'boş', baslangic: null, sure: 0 }
+    1: { durum: 'bos', baslangic: null, sure: 0 },
+    2: { durum: 'bos', baslangic: null, sure: 0 },
+    3: { durum: 'bos', baslangic: null, sure: 0 },
+    4: { durum: 'bos', baslangic: null, sure: 0 },
+    5: { durum: 'bos', baslangic: null, sure: 0 },
+    6: { durum: 'bos', baslangic: null, sure: 0 },
+    7: { durum: 'bos', baslangic: null, sure: 0 },
+    8: { durum: 'bos', baslangic: null, sure: 0 },
+    9: { durum: 'bos', baslangic: null, sure: 0 },
+    10: { durum: 'bos', baslangic: null, sure: 0 }
 };
-
-// Masa durumu güncelle
-function masaDurumuGuncelle(masaNo, yeniDurum) {
-    if (masaDurumlari[masaNo]) {
-        masaDurumlari[masaNo].durum = yeniDurum;
-        if (yeniDurum === 'dolu') {
-            masaDurumlari[masaNo].baslangic = new Date();
-        } else if (yeniDurum === 'boş') {
-            masaDurumlari[masaNo].baslangic = null;
-            masaDurumlari[masaNo].sure = 0;
-        }
-    }
-}
 
 // Masa durumlarını getir
 app.get('/masa-durumlari', (req, res) => {
-    // Süreleri hesapla
     const simdi = new Date();
     Object.keys(masaDurumlari).forEach(masa => {
         if (masaDurumlari[masa].durum === 'dolu' && masaDurumlari[masa].baslangic) {
@@ -125,16 +151,42 @@ app.get('/masa-durumlari', (req, res) => {
     res.json(masaDurumlari);
 });
 
-// Masa boşalt (admin panelden manuel)
+// Masa boşalt
 app.post('/masa-bosalt', (req, res) => {
     const { masaNo } = req.body;
     if (masaDurumlari[masaNo]) {
-        masaDurumlari[masaNo].durum = 'boş';
+        masaDurumlari[masaNo].durum = 'bos';
         masaDurumlari[masaNo].baslangic = null;
         masaDurumlari[masaNo].sure = 0;
         res.json({ basarili: true });
     } else {
         res.json({ basarili: false });
+    }
+});
+
+// Masa sıfırla (tüm siparişleri sil)
+app.post('/masa-sifirla', (req, res) => {
+    const { masaNo } = req.body;
+    
+    try {
+        if (fs.existsSync('orders.json')) {
+            const siparisler = JSON.parse(fs.readFileSync('orders.json'));
+            const yeniSiparisler = siparisler.filter(s => s.masa != masaNo);
+            fs.writeFileSync('orders.json', JSON.stringify(yeniSiparisler, null, 2));
+            
+            if (masaDurumlari[masaNo]) {
+                masaDurumlari[masaNo].durum = 'bos';
+                masaDurumlari[masaNo].baslangic = null;
+                masaDurumlari[masaNo].sure = 0;
+            }
+            
+            res.json({ basarili: true });
+        } else {
+            res.json({ basarili: false });
+        }
+    } catch (e) {
+        console.error('Sıfırlama hatası:', e);
+        res.json({ basarili: false, hata: e.message });
     }
 });
 
@@ -145,34 +197,4 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server ${PORT} portunda çalışıyor`);
-});
-// MASAYI TAMAMEN SIFIRLA (TÜM SİPARİŞLERİ SİL)
-app.post('/masa-sifirla', (req, res) => {
-    const { masaNo } = req.body;
-    
-    try {
-        if (fs.existsSync('orders.json')) {
-            const siparisler = JSON.parse(fs.readFileSync('orders.json'));
-            
-            // SADECE BU MASAYA AİT SİPARİŞLERİ FİLTRELE (SİL)
-            const yeniSiparisler = siparisler.filter(s => s.masa != masaNo);
-            
-            fs.writeFileSync('orders.json', JSON.stringify(yeniSiparisler, null, 2));
-            console.log(`Masa ${masaNo} tamamen sıfırlandı.`);
-            
-            // Masa durumunu da güncelle
-            if (masaDurumlari[masaNo]) {
-                masaDurumlari[masaNo].durum = 'boş';
-                masaDurumlari[masaNo].baslangic = null;
-                masaDurumlari[masaNo].sure = 0;
-            }
-            
-            res.json({ basarili: true });
-        } else {
-            res.json({ basarili: false, hata: 'Dosya bulunamadı' });
-        }
-    } catch (e) {
-        console.error('Sıfırlama hatası:', e);
-        res.json({ basarili: false, hata: e.message });
-    }
 });

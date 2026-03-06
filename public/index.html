@@ -83,15 +83,17 @@
             color: rgba(255,255,255,0.8);
         }
 
-        .garson-buton {
-            text-align: center;
+        .butonlar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin: 15px 0;
+            align-items: center;
         }
 
-        .garson-buton button {
-            background: #4caf50;
-            color: white;
-            border: none;
+        .butonlar button {
+            width: 100%;
+            max-width: 300px;
             padding: 15px 30px;
             border-radius: 50px;
             font-size: clamp(1rem, 4vw, 1.2rem);
@@ -101,17 +103,26 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            transition: all 0.3s;
-            width: 100%;
-            max-width: 300px;
             justify-content: center;
+            transition: all 0.3s;
+            border: none;
         }
 
-        .garson-buton button:active {
+        .garson-buton button {
+            background: #4caf50;
+            color: white;
+        }
+
+        .hesap-buton button {
+            background: #2196f3;
+            color: white;
+        }
+
+        .butonlar button:active {
             transform: scale(0.95);
         }
 
-        .garson-buton button:disabled {
+        .butonlar button:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
@@ -403,11 +414,19 @@
         </div>
     </header>
 
-    <div class="garson-buton">
-        <button onclick="garsonCagir()" id="garsonBtn">
-            <span style="font-size: 1.5rem;">🛎️</span>
-            Garson Çağır
-        </button>
+    <div class="butonlar">
+        <div class="garson-buton">
+            <button onclick="garsonCagir()" id="garsonBtn">
+                <span style="font-size: 1.5rem;">🛎️</span>
+                Garson Çağır
+            </button>
+        </div>
+        <div class="hesap-buton">
+            <button onclick="hesapIste()" id="hesapBtn">
+                <span style="font-size: 1.5rem;">💰</span>
+                Hesap İste
+            </button>
+        </div>
     </div>
 
     <main>
@@ -476,11 +495,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         let masaNo = urlParams.get('masa') || '1';
 
-        // Masa seçiciyi ayarla
         document.getElementById('masaNo').textContent = masaNo;
         document.getElementById('masaSecici').value = masaNo;
 
-        // Masa değişince URL'i güncelle
         document.getElementById('masaSecici').addEventListener('change', function() {
             const yeniMasa = this.value;
             const url = new URL(window.location.href);
@@ -511,6 +528,37 @@
                         btn.disabled = false;
                         btn.style.background = '#4caf50';
                         btn.innerHTML = '<span style="font-size:1.5rem;">🛎️</span> Garson Çağır';
+                    }, 30000);
+                }
+            })
+            .catch(() => {
+                toastGoster('Hata oluştu!');
+            });
+        };
+
+        // Hesap iste
+        window.hesapIste = function() {
+            const btn = document.getElementById('hesapBtn');
+            const masaNo = document.getElementById('masaNo').textContent;
+            
+            fetch('/hesap-iste', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ masa: masaNo })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.basarili) {
+                    toastGoster('💰 Hesap isteğiniz iletildi! Garsonunuz geliyor.');
+                    
+                    btn.disabled = true;
+                    btn.style.background = '#ccc';
+                    btn.innerHTML = '<span style="font-size:1.5rem;">✅</span> İstendi';
+                    
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.style.background = '#2196f3';
+                        btn.innerHTML = '<span style="font-size:1.5rem;">💰</span> Hesap İste';
                     }, 30000);
                 }
             })
@@ -591,12 +639,10 @@
             sepetGuncelle();
         };
 
-        // Ürün notunu güncelle
         window.urunNotGuncelle = function(id, not, index) {
             const urunIndex = sepet.findIndex(u => u.id === id);
             if (urunIndex !== -1) {
                 sepet[urunIndex].not = not;
-                console.log('Not güncellendi:', sepet[urunIndex]);
             }
         };
 
@@ -632,7 +678,6 @@
                             </div>
                         </div>
                         
-                        <!-- SİPARİŞ NOTU ALANI -->
                         <div style="margin: 5px 0;">
                             <input type="text" 
                                    id="not-${urun.id}-${index}" 
@@ -670,8 +715,6 @@
                 })),
                 toplam: sepet.reduce((t, u) => t + (u.fiyat * u.adet), 0)
             };
-
-            console.log('Gönderilen sipariş:', siparis);
 
             fetch('/siparis', {
                 method: 'POST',

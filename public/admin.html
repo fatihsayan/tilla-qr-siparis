@@ -58,7 +58,6 @@
             background: #f0f0f0;
         }
 
-        /* MASA DURUMLARI */
         .masa-durumlari {
             background: white;
             padding: 20px;
@@ -188,7 +187,6 @@
             background: #c82333;
         }
 
-        /* İKİLİ BİLDİRİM KUTULARI */
         .bildirim-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -407,7 +405,6 @@
             margin-bottom: 15px;
         }
 
-        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -789,7 +786,6 @@
             fetch('/garson-cagrilar')
                 .then(res => res.json())
                 .then(cagrilar => {
-                    // YENİ ÇAĞRI VARSA ALERT
                     if (cagrilar.length > oncekiCagriSayisi) {
                         const yeniCagrilar = cagrilar.slice(oncekiCagriSayisi);
                         yeniCagrilar.forEach(c => {
@@ -856,7 +852,6 @@
             fetch('/hesap-istekleri')
                 .then(res => res.json())
                 .then(hesaplar => {
-                    // YENİ HESAP İSTEĞİ VARSA ALERT
                     if (hesaplar.length > oncekiHesapSayisi) {
                         const yeniHesaplar = hesaplar.slice(oncekiHesapSayisi);
                         yeniHesaplar.forEach(h => {
