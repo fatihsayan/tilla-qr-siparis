@@ -270,8 +270,12 @@
             .durum { width: 100%; text-align: center; }
         }
     </style>
-    <audio id="siparisSesi" preload="auto" style="display: none;">
+    <    <audio id="siparisSesi" preload="auto" style="display: none;">
         <source src="/ses/bildirimsesi.mp3" type="audio/mpeg">
+    </audio>
+    <!-- GARSON ÇAĞRISI İÇİN YENİ SES EKLENDİ -->
+    <audio id="garsonSesi" preload="auto" style="display: none;">
+        <source src="/ses/garson-cagri.mp3" type="audio/mpeg">
     </audio>
 </head>
 <body>
@@ -328,6 +332,15 @@
                             alert(`🛎️ GARSON ÇAĞRISI!\nMasa ${c.masa} garson çağırıyor.`);
                         });
                     }
+                    if (cagrilar.length > oncekiCagriSayisi) {
+    const yeniCagrilar = cagrilar.slice(oncekiCagriSayisi);
+    yeniCagrilar.forEach(c => {
+        alert(`🛎️ GARSON ÇAĞRISI!\nMasa ${c.masa} garson çağırıyor.`);
+        
+        // 🔔 GARSON SESİ ÇAL
+        document.getElementById('garsonSesi').play().catch(e => console.log('Garson sesi hatası:', e));
+    });
+}
                     oncekiCagriSayisi = cagrilar.length;
 
                     // Garson çağrılarını gösterme (SARI KUTU)
