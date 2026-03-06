@@ -58,7 +58,6 @@
             background: #f0f0f0;
         }
 
-        /* MASA DURUMLARI */
         .masa-durumlari {
             background: white;
             padding: 20px;
@@ -179,16 +178,15 @@
             background: #b85e1a;
         }
 
-        .masa-btn.kapat {
+        .masa-btn.sifirla {
             background: #dc3545;
             color: white;
         }
 
-        .masa-btn.kapat:hover {
+        .masa-btn.sifirla:hover {
             background: #c82333;
         }
 
-        /* HESAP MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -275,7 +273,7 @@
             background: #5a6268;
         }
 
-        .modal-kapat {
+        .modal-sifirla {
             background: #dc3545;
             color: white;
             border: none;
@@ -287,7 +285,7 @@
             flex: 1;
         }
 
-        .modal-kapat:hover {
+        .modal-sifirla:hover {
             background: #c82333;
         }
 
@@ -525,15 +523,11 @@
         </button>
     </div>
 
-    <!-- MASA DURUMLARI -->
     <div class="masa-durumlari" id="masaDurumlari">
         <h2><span>🪑</span> Masa Durumları</h2>
-        <div class="masa-grid" id="masaGrid">
-            <!-- JavaScript ile doldurulacak -->
-        </div>
+        <div class="masa-grid" id="masaGrid"></div>
     </div>
 
-    <!-- HESAP MODAL -->
     <div class="modal" id="hesapModal">
         <div class="modal-icerik">
             <h2 id="modalBaslik">Masa Hesabı</h2>
@@ -541,7 +535,7 @@
             <div id="modalToplam" class="modal-toplam"></div>
             <div class="modal-actions">
                 <button class="modal-close" onclick="modalKapat()">Kapat</button>
-                <button class="modal-kapat" id="modalMasayiKapat" onclick="modalMasayiKapat()">Masayı Kapat ve Boşalt</button>
+                <button class="modal-sifirla" id="modalMasayiSifirla" onclick="modalMasayiSifirla()">🗑️ Masayı Sıfırla (Tüm Siparişleri Sil)</button>
             </div>
         </div>
     </div>
@@ -573,26 +567,9 @@
         let tumSiparisler = [];
         let aktifMasa = null;
 
-        // SADECE AKTİF (SON 1 SAAT) SİPARİŞLERİ FİLTRELE
-        function aktifSiparisleriGetir() {
-            const simdi = new Date();
-            const birSaatOnce = new Date(simdi.getTime() - 60 * 60 * 1000); // Son 1 saat
-            
-            return tumSiparisler.filter(s => {
-                if (!s.tarih) return false;
-                try {
-                    const siparisTarihi = new Date(s.tarih);
-                    return siparisTarihi >= birSaatOnce;
-                } catch (e) {
-                    return false;
-                }
-            });
-        }
-
-        // Masa toplamını hesapla (SADECE AKTİF SİPARİŞLER)
+        // Masa toplamını hesapla
         function masaToplaminiHesapla(masaNo) {
-            const aktifSiparisler = aktifSiparisleriGetir();
-            const masaSiparisleri = aktifSiparisler.filter(s => s.masa == masaNo);
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             let toplam = 0;
             
             masaSiparisleri.forEach(siparis => {
@@ -608,10 +585,9 @@
             return toplam;
         }
 
-        // Masa ürün özetini hesapla (SADECE AKTİF SİPARİŞLER)
+        // Masa ürün özetini hesapla
         function masaUrunOzetiniHesapla(masaNo) {
-            const aktifSiparisler = aktifSiparisleriGetir();
-            const masaSiparisleri = aktifSiparisler.filter(s => s.masa == masaNo);
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             let tumUrunler = [];
             
             masaSiparisleri.forEach(siparis => {
@@ -629,7 +605,7 @@
             return ozet;
         }
 
-        // Masa aktif mi kontrol et (son 1 saatte sipariş var mı)
+        // Masa aktif mi kontrol et
         function masaAktifMi(masaNo) {
             const toplam = masaToplaminiHesapla(masaNo);
             return toplam > 0;
@@ -640,28 +616,21 @@
             fetch('/masa-durumlari')
                 .then(res => res.json())
                 .then(durumlar => {
-                    console.log('Masa durumları:', durumlar);
-                    
                     let html = '';
                     let doluMasaSayisi = 0;
                     
                     for (let i = 1; i <= 10; i++) {
-                        // SADECE AKTİF SİPARİŞ VARSA DOLU GÖSTER
                         const aktifMi = masaAktifMi(i);
-                        const masaDurumu = aktifMi ? 'dolu' : 'bos';
                         if (aktifMi) doluMasaSayisi++;
                         
-                        // TOPLAM TUTARI HESAPLA (SADECE AKTİF SİPARİŞLER)
                         const toplamTutar = masaToplaminiHesapla(i);
-                        
-                        // ÜRÜN ÖZETİNİ HESAPLA (SADECE AKTİF SİPARİŞLER)
                         const urunOzet = masaUrunOzetiniHesapla(i);
                         
                         html += `
-                            <div class="masa-kart ${masaDurumu}">
+                            <div class="masa-kart ${aktifMi ? 'dolu' : 'bos'}">
                                 <div class="masa-numarasi">
                                     <span>Masa ${i}</span>
-                                    <span class="masa-durum-badge ${masaDurumu}">
+                                    <span class="masa-durum-badge ${aktifMi ? 'dolu' : 'bos'}">
                                         ${aktifMi ? '🟠 Dolu' : '🟢 Boş'}
                                     </span>
                                 </div>
@@ -681,8 +650,8 @@
                                         <button class="masa-btn hesap" onclick="masaHesabiGoster(${i})">
                                             📋 Hesap Detay
                                         </button>
-                                        <button class="masa-btn kapat" onclick="masaKapat(${i})">
-                                            🗑️ Masayı Kapat
+                                        <button class="masa-btn sifirla" onclick="masaSifirla(${i})">
+                                            🗑️ Masayı Sıfırla
                                         </button>
                                     </div>
                                 ` : ''}
@@ -695,18 +664,17 @@
                 });
         }
 
-        // Masa hesabını göster (SADECE AKTİF SİPARİŞLER)
+        // Masa hesabını göster
         window.masaHesabiGoster = function(masaNo) {
             aktifMasa = masaNo;
-            const aktifSiparisler = aktifSiparisleriGetir();
-            const masaSiparisleri = aktifSiparisler.filter(s => s.masa == masaNo);
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             
             if (masaSiparisleri.length === 0) {
-                alert(`Masa ${masaNo} için aktif sipariş yok.`);
+                alert(`Masa ${masaNo} için sipariş yok.`);
                 return;
             }
             
-            document.getElementById('modalBaslik').innerHTML = `<span>📋</span> Masa ${masaNo} Hesabı (Aktif Siparişler)`;
+            document.getElementById('modalBaslik').innerHTML = `<span>📋</span> Masa ${masaNo} Hesabı`;
             
             let urunlerHtml = '';
             let toplam = 0;
@@ -745,11 +713,10 @@
             document.getElementById('hesapModal').classList.add('active');
         };
 
-        // Masayı kapat (SİPARİŞLERİ SİLMEZ, SADECE GÖSTERGEYİ SIFIRLAR)
-        window.masaKapat = function(masaNo) {
-            if (confirm(`Masa ${masaNo}'ı kapatmak istediğinize emin misiniz?`)) {
-                // SADECE SUNUCUDAKİ MASA DURUMUNU SIFIRLA
-                fetch('/masa-bosalt', {
+        // MASAYI TAMAMEN SIFIRLA (TÜM SİPARİŞLERİ SİL)
+        window.masaSifirla = function(masaNo) {
+            if (confirm(`⚠️ Masa ${masaNo}'daki TÜM SİPARİŞLER SİLİNECEK!\n\nBu işlem geri alınamaz. Devam etmek istediğinize emin misiniz?`)) {
+                fetch('/masa-sifirla', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ masaNo: masaNo })
@@ -757,10 +724,10 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.basarili) {
-                        alert(`✅ Masa ${masaNo} başarıyla kapatıldı.`);
+                        alert(`✅ Masa ${masaNo} tamamen sıfırlandı! Tüm siparişler silindi.`);
                         tumunuGetir(); // Sayfayı yenile
                     } else {
-                        alert('❌ Bir hata oluştu!');
+                        alert('❌ Bir hata oluştu: ' + (data.hata || 'Bilinmeyen hata'));
                     }
                 })
                 .catch(err => {
@@ -770,9 +737,9 @@
             }
         };
 
-        window.modalMasayiKapat = function() {
+        window.modalMasayiSifirla = function() {
             if (aktifMasa) {
-                masaKapat(aktifMasa);
+                masaSifirla(aktifMasa);
                 modalKapat();
             }
         };
@@ -794,8 +761,6 @@
             fetch('/garson-cagrilar')
                 .then(res => res.json())
                 .then(cagrilar => {
-                    console.log('Garson çağrıları:', cagrilar);
-                    
                     if (cagrilar.length > oncekiCagriSayisi) {
                         const yeniCagrilar = cagrilar.slice(oncekiCagriSayisi);
                         yeniCagrilar.forEach(c => {
@@ -861,7 +826,6 @@
             fetch('/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
-                    console.log('Siparişler:', siparisler);
                     tumSiparisler = siparisler;
                     
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {

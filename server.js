@@ -146,3 +146,33 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server ${PORT} portunda çalışıyor`);
 });
+// MASAYI TAMAMEN SIFIRLA (TÜM SİPARİŞLERİ SİL)
+app.post('/masa-sifirla', (req, res) => {
+    const { masaNo } = req.body;
+    
+    try {
+        if (fs.existsSync('orders.json')) {
+            const siparisler = JSON.parse(fs.readFileSync('orders.json'));
+            
+            // SADECE BU MASAYA AİT SİPARİŞLERİ FİLTRELE (SİL)
+            const yeniSiparisler = siparisler.filter(s => s.masa != masaNo);
+            
+            fs.writeFileSync('orders.json', JSON.stringify(yeniSiparisler, null, 2));
+            console.log(`Masa ${masaNo} tamamen sıfırlandı.`);
+            
+            // Masa durumunu da güncelle
+            if (masaDurumlari[masaNo]) {
+                masaDurumlari[masaNo].durum = 'boş';
+                masaDurumlari[masaNo].baslangic = null;
+                masaDurumlari[masaNo].sure = 0;
+            }
+            
+            res.json({ basarili: true });
+        } else {
+            res.json({ basarili: false, hata: 'Dosya bulunamadı' });
+        }
+    } catch (e) {
+        console.error('Sıfırlama hatası:', e);
+        res.json({ basarili: false, hata: e.message });
+    }
+});
