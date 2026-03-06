@@ -1,4 +1,4 @@
-process.env.TZ = 'Europe/Istanbul'; // Türkiye saat dilimi
+process.env.TZ = 'Europe/Istanbul';
 
 const express = require('express');
 const fs = require('fs');
@@ -9,9 +9,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// Sipariş kaydet
 app.post('/siparis', (req, res) => {
     const siparis = req.body;
+    console.log('Gelen sipariş (notlar dahil):', siparis);
+    
     siparis.tarih = new Date().toISOString();
     
     let siparisler = [];
@@ -26,7 +27,6 @@ app.post('/siparis', (req, res) => {
     res.json({ basarili: true });
 });
 
-// Siparişleri getir
 app.get('/siparisler', (req, res) => {
     try {
         if (fs.existsSync('orders.json')) {
@@ -40,7 +40,6 @@ app.get('/siparisler', (req, res) => {
     }
 });
 
-// Garson çağır
 app.post('/garson-cagir', (req, res) => {
     const masaNo = req.body.masa || 'Belirtilmemiş';
     const zaman = new Date().toLocaleString('tr-TR');
@@ -63,7 +62,6 @@ app.post('/garson-cagir', (req, res) => {
     res.json({ basarili: true });
 });
 
-// Garson çağrılarını getir
 app.get('/garson-cagrilar', (req, res) => {
     try {
         if (fs.existsSync('cagrilar.json')) {
@@ -77,7 +75,6 @@ app.get('/garson-cagrilar', (req, res) => {
     }
 });
 
-// Health check
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tilla Pastanesi - Sipariş Paneli</title>
+    <title>Tilla Pastanesi - Admin Paneli</title>
     <style>
         * {
             margin: 0;
@@ -58,7 +58,39 @@
             background: #f0f0f0;
         }
 
-        /* GARSON ÇAĞRI BÖLÜMÜ - SARI KUTU */
+        /* MASA FİLTRELEME */
+        .masa-filtre {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .masa-filtre button {
+            background: #f0e0d0;
+            color: #d2691e;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .masa-filtre button.active {
+            background: #d2691e;
+            color: white;
+        }
+
+        .masa-filtre button:hover {
+            transform: scale(1.05);
+        }
+
         .garson-cagri {
             background: #ff9800;
             color: white;
@@ -213,6 +245,13 @@
             margin-left: 8px;
         }
 
+        .urun-not {
+            font-size: 0.8rem;
+            color: #d2691e;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
         .urun-fiyat {
             font-weight: bold;
             color: #d2691e;
@@ -262,6 +301,7 @@
             .header { flex-direction: column; text-align: center; }
             .header h1 { font-size: 1.4rem; }
             .yenile-btn { width: 100%; justify-content: center; }
+            .masa-filtre { justify-content: center; }
             .siparis-header { flex-direction: column; align-items: flex-start; }
             .masa-badge { width: 100%; justify-content: center; }
             .zaman { width: 100%; text-align: center; }
@@ -270,7 +310,6 @@
             .durum { width: 100%; text-align: center; }
         }
     </style>
-    <!-- SİPARİŞ SESİ -->
     <audio id="siparisSesi" preload="auto" style="display: none;">
         <source src="/ses/bildirimsesi.mp3" type="audio/mpeg">
     </audio>
@@ -287,7 +326,20 @@
         </button>
     </div>
 
-    <!-- GARSON ÇAĞRILARI BÖLÜMÜ - SARI KUTU -->
+    <div class="masa-filtre" id="masaFiltre">
+        <button onclick="filtrele('hepsi')" id="filtre-hepsi" class="active">Tüm Masalar</button>
+        <button onclick="filtrele('1')" id="filtre-1">Masa 1</button>
+        <button onclick="filtrele('2')" id="filtre-2">Masa 2</button>
+        <button onclick="filtrele('3')" id="filtre-3">Masa 3</button>
+        <button onclick="filtrele('4')" id="filtre-4">Masa 4</button>
+        <button onclick="filtrele('5')" id="filtre-5">Masa 5</button>
+        <button onclick="filtrele('6')" id="filtre-6">Masa 6</button>
+        <button onclick="filtrele('7')" id="filtre-7">Masa 7</button>
+        <button onclick="filtrele('8')" id="filtre-8">Masa 8</button>
+        <button onclick="filtrele('9')" id="filtre-9">Masa 9</button>
+        <button onclick="filtrele('10')" id="filtre-10">Masa 10</button>
+    </div>
+
     <div id="garsonCagriBolumu"></div>
 
     <div class="stats">
@@ -312,15 +364,108 @@
     <script>
         let oncekiSiparisSayisi = 0;
         let oncekiCagriSayisi = 0;
+        let tumSiparisler = [];
+        let aktifFiltre = 'hepsi';
 
-        // ===== GARSON ÇAĞRILARINI GETİR (SARI KUTU + ALERT) =====
+        function filtrele(masa) {
+            aktifFiltre = masa;
+            
+            document.querySelectorAll('.masa-filtre button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`filtre-${masa}`).classList.add('active');
+            
+            siparisleriGoster(tumSiparisler);
+        }
+
+        function siparisleriGoster(siparisler) {
+            let filtrelenmis = siparisler;
+            
+            if (aktifFiltre !== 'hepsi') {
+                filtrelenmis = siparisler.filter(s => s.masa == aktifFiltre);
+            }
+
+            const container = document.getElementById('siparisler');
+            
+            if (filtrelenmis.length === 0) {
+                container.innerHTML = `<div class="yok"><span>🍰</span>Masa ${aktifFiltre === 'hepsi' ? 'lar' : aktifFiltre} için sipariş yok</div>`;
+                return;
+            }
+
+            let html = '';
+            filtrelenmis.reverse().forEach((sip, index) => {
+                let masaNo = sip.masa || 'Belirtilmemiş';
+                
+                let tarih = sip.tarih || '';
+                if (tarih) {
+                    try {
+                        const date = new Date(tarih);
+                        if (!isNaN(date)) {
+                            tarih = date.toLocaleString('tr-TR', { 
+                                timeZone: 'Europe/Istanbul',
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        }
+                    } catch (e) {}
+                }
+                
+                let urunlerHtml = '';
+                let toplam = 0;
+                
+                if (sip.urunler && sip.urunler.length > 0) {
+                    sip.urunler.forEach(u => {
+                        const urunAdi = u.urun || u.isim || 'Ürün';
+                        const fiyat = u.fiyat || 0;
+                        const adet = u.adet || 1;
+                        const not = u.not || '';
+                        const araToplam = fiyat * adet;
+                        toplam += araToplam;
+                        
+                        urunlerHtml += `
+                            <div class="urun">
+                                <div>
+                                    <span class="urun-adi">${urunAdi}</span>
+                                    <span class="urun-adet">${adet} adet</span>
+                                    ${not ? `<div class="urun-not">📝 Not: ${not}</div>` : ''}
+                                </div>
+                                <span class="urun-fiyat">${araToplam} TL</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += `
+                    <div class="siparis" style="animation-delay: ${index * 0.05}s">
+                        <div class="siparis-header">
+                            <div class="masa-badge">
+                                <span>📌</span> Masa ${masaNo}
+                            </div>
+                            <div class="zaman">
+                                <span>⏰</span> ${tarih}
+                            </div>
+                        </div>
+                        <div class="urunler">${urunlerHtml}</div>
+                        <div class="siparis-footer">
+                            <div class="toplam">💰 Toplam: ${toplam} TL</div>
+                            <div class="durum">✅ Yeni</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
         function garsonCagrilariniGetir() {
             fetch('/garson-cagrilar')
                 .then(res => res.json())
                 .then(cagrilar => {
                     console.log('Garson çağrıları:', cagrilar);
                     
-                    // YENİ ÇAĞRI VARSA ALERT GÖSTER
                     if (cagrilar.length > oncekiCagriSayisi) {
                         const yeniCagrilar = cagrilar.slice(oncekiCagriSayisi);
                         yeniCagrilar.forEach(c => {
@@ -329,13 +474,11 @@
                     }
                     oncekiCagriSayisi = cagrilar.length;
 
-                    // SARI KUTUYU GÖSTER
                     if (cagrilar.length === 0) {
                         document.getElementById('garsonCagriBolumu').innerHTML = '';
                         return;
                     }
 
-                    // Son 10 dakikadaki çağrıları göster
                     const simdi = new Date();
                     const sonCagrilar = cagrilar.filter(c => {
                         try {
@@ -366,7 +509,6 @@
                         return;
                     }
 
-                    // SARI KUTU HTML'İ
                     let html = '<div class="garson-cagri">';
                     html += '<h3><span>🛎️</span> Garson Çağrıları</h3>';
                     
@@ -385,24 +527,18 @@
                 .catch(err => console.log('Garson çağrı hatası:', err));
         }
 
-        // ===== SİPARİŞLERİ GETİR (SESLİ) =====
         function siparisleriGetir() {
             fetch('/siparisler')
                 .then(res => res.json())
                 .then(siparisler => {
                     console.log('Siparişler:', siparisler);
+                    tumSiparisler = siparisler;
                     
-                    // YENİ SİPARİŞ VARSA SES ÇAL
                     if (oncekiSiparisSayisi > 0 && siparisler.length > oncekiSiparisSayisi) {
                         document.getElementById('siparisSesi').play().catch(e => console.log('Ses hatası:', e));
-                        
-                        // İsteğe bağlı: Yeni sipariş için alert
-                        // const yeniSayi = siparisler.length - oncekiSiparisSayisi;
-                        // alert(`🛎️ ${yeniSayi} yeni sipariş geldi!`);
                     }
                     oncekiSiparisSayisi = siparisler.length;
 
-                    // İstatistikler
                     document.getElementById('toplamSiparis').textContent = siparisler.length;
                     
                     const bugun = new Date().toDateString();
@@ -418,89 +554,16 @@
                     
                     document.getElementById('bekleyenSiparis').textContent = siparisler.length;
 
-                    // Siparişleri listele
-                    const container = document.getElementById('siparisler');
-                    
-                    if (siparisler.length === 0) {
-                        container.innerHTML = '<div class="yok"><span>🍰</span>Henüz sipariş yok</div>';
-                        return;
-                    }
-
-                    let html = '';
-                    siparisler.reverse().forEach((sip, index) => {
-                        let masaNo = sip.masa || 'Belirtilmemiş';
-                        
-                        let tarih = sip.tarih || '';
-                        if (tarih) {
-                            try {
-                                const date = new Date(tarih);
-                                if (!isNaN(date)) {
-                                    tarih = date.toLocaleString('tr-TR', { 
-                                        timeZone: 'Europe/Istanbul',
-                                        year: 'numeric',
-                                        month: '2-digit',
-                                        day: '2-digit',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    });
-                                }
-                            } catch (e) {}
-                        }
-                        
-                        let urunlerHtml = '';
-                        let toplam = 0;
-                        
-                        if (sip.urunler && sip.urunler.length > 0) {
-                            sip.urunler.forEach(u => {
-                                const urunAdi = u.urun || u.isim || 'Ürün';
-                                const fiyat = u.fiyat || 0;
-                                const adet = u.adet || 1;
-                                const araToplam = fiyat * adet;
-                                toplam += araToplam;
-                                
-                                urunlerHtml += `
-                                    <div class="urun">
-                                        <div>
-                                            <span class="urun-adi">${urunAdi}</span>
-                                            <span class="urun-adet">${adet} adet</span>
-                                        </div>
-                                        <span class="urun-fiyat">${araToplam} TL</span>
-                                    </div>
-                                `;
-                            });
-                        }
-
-                        html += `
-                            <div class="siparis" style="animation-delay: ${index * 0.05}s">
-                                <div class="siparis-header">
-                                    <div class="masa-badge">
-                                        <span>📌</span> Masa ${masaNo}
-                                    </div>
-                                    <div class="zaman">
-                                        <span>⏰</span> ${tarih}
-                                    </div>
-                                </div>
-                                <div class="urunler">${urunlerHtml}</div>
-                                <div class="siparis-footer">
-                                    <div class="toplam">💰 Toplam: ${toplam} TL</div>
-                                    <div class="durum">✅ Yeni</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    container.innerHTML = html;
+                    siparisleriGoster(tumSiparisler);
                 })
                 .catch(err => console.log('Sipariş hatası:', err));
         }
 
-        // ===== TÜMÜNÜ GETİR =====
         function tumunuGetir() {
             siparisleriGetir();
             garsonCagrilariniGetir();
         }
 
-        // SAYFA YÜKLENİNCE VE 3 SANİYEDE BİR ÇALIŞTIR
         tumunuGetir();
         setInterval(tumunuGetir, 3000);
     </script>

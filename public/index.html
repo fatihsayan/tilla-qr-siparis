@@ -285,12 +285,8 @@
         }
 
         #sepet li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
             border-bottom: 1px solid #f0d9b5;
-            font-size: clamp(0.8rem, 3vw, 0.9rem);
+            padding: 10px 0;
         }
 
         .sepet-urun-adet {
@@ -484,12 +480,12 @@
         document.getElementById('masaNo').textContent = masaNo;
         document.getElementById('masaSecici').value = masaNo;
 
-        // Masa değişince URL'i güncelle (sayfa yenilenir)
+        // Masa değişince URL'i güncelle
         document.getElementById('masaSecici').addEventListener('change', function() {
             const yeniMasa = this.value;
             const url = new URL(window.location.href);
             url.searchParams.set('masa', yeniMasa);
-            window.location.href = url.toString(); // Sayfa yenilenir ve yeni masaya göre menü gelir
+            window.location.href = url.toString();
         });
 
         // Garson çağır
@@ -572,7 +568,7 @@
             if (sepetteki) {
                 sepetteki.adet = (sepetteki.adet || 1) + 1;
             } else {
-                sepet.push({ ...urun, adet: 1 });
+                sepet.push({ ...urun, adet: 1, not: '' });
             }
             
             sepetGuncelle();
@@ -595,6 +591,15 @@
             sepetGuncelle();
         };
 
+        // Ürün notunu güncelle
+        window.urunNotGuncelle = function(id, not, index) {
+            const urunIndex = sepet.findIndex(u => u.id === id);
+            if (urunIndex !== -1) {
+                sepet[urunIndex].not = not;
+                console.log('Not güncellendi:', sepet[urunIndex]);
+            }
+        };
+
         function sepetGuncelle() {
             const sepetListe = document.getElementById('sepet');
             const toplamSpan = document.getElementById('sepetToplam');
@@ -609,20 +614,36 @@
             let html = '';
             let toplam = 0;
             
-            sepet.forEach(urun => {
+            sepet.forEach((urun, index) => {
                 const araToplam = urun.fiyat * urun.adet;
                 toplam += araToplam;
                 
                 html += `
                     <li>
-                        <div style="flex:1">
-                            <div><strong>${urun.isim}</strong></div>
-                            <div style="font-size:0.8rem; color:#666;">${urun.fiyat} ₺ x ${urun.adet} = ${araToplam} ₺</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <div>
+                                <strong>${urun.isim}</strong>
+                                <span style="color:#d2691e; margin-left:5px;">${urun.fiyat} ₺</span>
+                            </div>
+                            <div class="sepet-urun-adet">
+                                <button onclick="sepetMiktarDegistir(${urun.id}, 'azalt')">−</button>
+                                <span>${urun.adet}</span>
+                                <button onclick="sepetMiktarDegistir(${urun.id}, 'artir')">+</button>
+                            </div>
                         </div>
-                        <div class="sepet-urun-adet">
-                            <button onclick="sepetMiktarDegistir(${urun.id}, 'azalt')">−</button>
-                            <span>${urun.adet}</span>
-                            <button onclick="sepetMiktarDegistir(${urun.id}, 'artir')">+</button>
+                        
+                        <!-- SİPARİŞ NOTU ALANI -->
+                        <div style="margin: 5px 0;">
+                            <input type="text" 
+                                   id="not-${urun.id}-${index}" 
+                                   value="${urun.not || ''}" 
+                                   placeholder="${urun.isim} için not (isteğe bağlı)"
+                                   style="width: 100%; padding: 8px; border: 1px solid #f0d9b5; border-radius: 5px; font-size: 0.9rem;"
+                                   onchange="urunNotGuncelle(${urun.id}, this.value, ${index})">
+                        </div>
+                        
+                        <div style="text-align: right; font-size:0.9rem; color:#666;">
+                            Ara Toplam: ${araToplam} ₺
                         </div>
                     </li>
                 `;
@@ -644,10 +665,13 @@
                 urunler: sepet.map(u => ({
                     urun: u.isim,
                     fiyat: u.fiyat,
-                    adet: u.adet
+                    adet: u.adet,
+                    not: u.not || ''
                 })),
                 toplam: sepet.reduce((t, u) => t + (u.fiyat * u.adet), 0)
             };
+
+            console.log('Gönderilen sipariş:', siparis);
 
             fetch('/siparis', {
                 method: 'POST',
