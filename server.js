@@ -9,9 +9,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
+// Sipariş kaydet
 app.post('/siparis', (req, res) => {
     const siparis = req.body;
-    console.log('Gelen sipariş (notlar dahil):', siparis);
+    console.log('Gelen sipariş:', siparis);
     
     siparis.tarih = new Date().toISOString();
     
@@ -24,9 +25,14 @@ app.post('/siparis', (req, res) => {
     
     siparisler.push(siparis);
     fs.writeFileSync('orders.json', JSON.stringify(siparisler, null, 2));
+    
+    // Masa durumunu güncelle (masa artık dolu)
+    masaDurumuGuncelle(siparis.masa, 'dolu');
+    
     res.json({ basarili: true });
 });
 
+// Siparişleri getir
 app.get('/siparisler', (req, res) => {
     try {
         if (fs.existsSync('orders.json')) {
@@ -40,6 +46,7 @@ app.get('/siparisler', (req, res) => {
     }
 });
 
+// Garson çağır
 app.post('/garson-cagir', (req, res) => {
     const masaNo = req.body.masa || 'Belirtilmemiş';
     const zaman = new Date().toLocaleString('tr-TR');
@@ -62,6 +69,7 @@ app.post('/garson-cagir', (req, res) => {
     res.json({ basarili: true });
 });
 
+// Garson çağrılarını getir
 app.get('/garson-cagrilar', (req, res) => {
     try {
         if (fs.existsSync('cagrilar.json')) {
@@ -75,6 +83,62 @@ app.get('/garson-cagrilar', (req, res) => {
     }
 });
 
+// Masa durumları
+let masaDurumlari = {
+    1: { durum: 'boş', baslangic: null, sure: 0 },
+    2: { durum: 'boş', baslangic: null, sure: 0 },
+    3: { durum: 'boş', baslangic: null, sure: 0 },
+    4: { durum: 'boş', baslangic: null, sure: 0 },
+    5: { durum: 'boş', baslangic: null, sure: 0 },
+    6: { durum: 'boş', baslangic: null, sure: 0 },
+    7: { durum: 'boş', baslangic: null, sure: 0 },
+    8: { durum: 'boş', baslangic: null, sure: 0 },
+    9: { durum: 'boş', baslangic: null, sure: 0 },
+    10: { durum: 'boş', baslangic: null, sure: 0 }
+};
+
+// Masa durumu güncelle
+function masaDurumuGuncelle(masaNo, yeniDurum) {
+    if (masaDurumlari[masaNo]) {
+        masaDurumlari[masaNo].durum = yeniDurum;
+        if (yeniDurum === 'dolu') {
+            masaDurumlari[masaNo].baslangic = new Date();
+        } else if (yeniDurum === 'boş') {
+            masaDurumlari[masaNo].baslangic = null;
+            masaDurumlari[masaNo].sure = 0;
+        }
+    }
+}
+
+// Masa durumlarını getir
+app.get('/masa-durumlari', (req, res) => {
+    // Süreleri hesapla
+    const simdi = new Date();
+    Object.keys(masaDurumlari).forEach(masa => {
+        if (masaDurumlari[masa].durum === 'dolu' && masaDurumlari[masa].baslangic) {
+            const fark = simdi - new Date(masaDurumlari[masa].baslangic);
+            const dakika = Math.floor(fark / 60000);
+            const saniye = Math.floor((fark % 60000) / 1000);
+            masaDurumlari[masa].sure = `${dakika} dk ${saniye} sn`;
+        }
+    });
+    res.json(masaDurumlari);
+});
+
+// Masa boşalt (admin panelden manuel)
+app.post('/masa-bosalt', (req, res) => {
+    const { masaNo } = req.body;
+    if (masaDurumlari[masaNo]) {
+        masaDurumlari[masaNo].durum = 'boş';
+        masaDurumlari[masaNo].baslangic = null;
+        masaDurumlari[masaNo].sure = 0;
+        res.json({ basarili: true });
+    } else {
+        res.json({ basarili: false });
+    }
+});
+
+// Health check
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
