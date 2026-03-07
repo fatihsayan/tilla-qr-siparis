@@ -151,39 +151,20 @@ app.get('/masa-durumlari', (req, res) => {
     res.json(masaDurumlari);
 });
 
-// Masa boşalt
-app.post('/masa-bosalt', (req, res) => {
-    const { masaNo } = req.body;
-    if (masaDurumlari[masaNo]) {
-        masaDurumlari[masaNo].durum = 'bos';
-        masaDurumlari[masaNo].baslangic = null;
-        masaDurumlari[masaNo].sure = 0;
-        res.json({ basarili: true });
-    } else {
-        res.json({ basarili: false });
-    }
-});
-
-// Masa sıfırla (tüm siparişleri sil)
+// Masa sıfırla (SADECE DURUM, SİPARİŞLER KALIR)
 app.post('/masa-sifirla', (req, res) => {
     const { masaNo } = req.body;
     
     try {
-        if (fs.existsSync('orders.json')) {
-            const siparisler = JSON.parse(fs.readFileSync('orders.json'));
-            const yeniSiparisler = siparisler.filter(s => s.masa != masaNo);
-            fs.writeFileSync('orders.json', JSON.stringify(yeniSiparisler, null, 2));
-            
-            if (masaDurumlari[masaNo]) {
-                masaDurumlari[masaNo].durum = 'bos';
-                masaDurumlari[masaNo].baslangic = null;
-                masaDurumlari[masaNo].sure = 0;
-            }
-            
-            res.json({ basarili: true });
-        } else {
-            res.json({ basarili: false });
+        // SADECE MASA DURUMUNU GÜNCELLE, SİPARİŞLERİ SİLME!
+        if (masaDurumlari[masaNo]) {
+            masaDurumlari[masaNo].durum = 'bos';
+            masaDurumlari[masaNo].baslangic = null;
+            masaDurumlari[masaNo].sure = 0;
         }
+        
+        console.log(`Masa ${masaNo} durumu sıfırlandı (siparişler korundu).`);
+        res.json({ basarili: true });
     } catch (e) {
         console.error('Sıfırlama hatası:', e);
         res.json({ basarili: false, hata: e.message });
