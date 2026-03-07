@@ -591,40 +591,25 @@
         let aktifMasa = null;
         let masaDurumlari = {};
 
-        // Masa toplamını hesapla (SADECE SON SIFIRLAMADAN SONRAKİ SİPARİŞLER)
+        // Masa toplamını hesapla - DÜZELTİLDİ
         function masaToplaminiHesapla(masaNo) {
             // Masa durumunu kontrol et - dolu mu?
             if (!masaDurumlari[masaNo] || masaDurumlari[masaNo].durum !== 'dolu') {
                 return 0;
             }
             
-            // Son sıfırlama zamanını al (yoksa çok eski bir tarih DEĞİL, masanın dolduğu an)
-            let baslangicZamani;
-            if (masaDurumlari[masaNo].sonSifirlama) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].sonSifirlama);
-            } else {
-                // Eğer hiç sıfırlanmamışsa, çok eski bir tarih DEĞİL, masanın dolduğu anı kullan
-                // Ama masanın dolduğu an yoksa, çok eski bir tarih kullan
-                baslangicZamani = masaDurumlari[masaNo].baslangic ? new Date(masaDurumlari[masaNo].baslangic) : new Date(0);
-            }
-            
-            // Bu masaya ait TÜM siparişleri al
+            // Bu masaya ait TÜM siparişleri al (hiç filtre yok)
             const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             
-            // Sadece baslangicZamani'ndan SONRAKİ siparişleri filtrele
-            const filtrelenmisSiparisler = masaSiparisleri.filter(s => {
-                if (!s.tarih) return false;
-                try {
-                    const siparisTarihi = new Date(s.tarih);
-                    return siparisTarihi >= baslangicZamani;
-                } catch (e) {
-                    return false;
-                }
-            });
+            // Eğer hiç sipariş yoksa 0 döndür
+            if (masaSiparisleri.length === 0) {
+                return 0;
+            }
             
+            // TÜM siparişlerin toplamını hesapla (filtre yok)
             let toplam = 0;
             
-            filtrelenmisSiparisler.forEach(siparis => {
+            masaSiparisleri.forEach(siparis => {
                 if (siparis.urunler && siparis.urunler.length > 0) {
                     siparis.urunler.forEach(u => {
                         const fiyat = u.fiyat || 0;
@@ -637,38 +622,19 @@
             return toplam;
         }
 
-        // Masa ürün özetini hesapla (SADECE SON SIFIRLAMADAN SONRAKİ SİPARİŞLER)
+        // Masa ürün özetini hesapla - DÜZELTİLDİ
         function masaUrunOzetiniHesapla(masaNo) {
             // Masa durumunu kontrol et - dolu mu?
             if (!masaDurumlari[masaNo] || masaDurumlari[masaNo].durum !== 'dolu') {
                 return '';
             }
             
-            // Son sıfırlama zamanını al (yoksa masanın dolduğu an)
-            let baslangicZamani;
-            if (masaDurumlari[masaNo].sonSifirlama) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].sonSifirlama);
-            } else {
-                baslangicZamani = masaDurumlari[masaNo].baslangic ? new Date(masaDurumlari[masaNo].baslangic) : new Date(0);
-            }
-            
-            // Bu masaya ait TÜM siparişleri al
+            // Bu masaya ait TÜM siparişleri al (hiç filtre yok)
             const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
-            
-            // Sadece baslangicZamani'ndan SONRAKİ siparişleri filtrele
-            const filtrelenmisSiparisler = masaSiparisleri.filter(s => {
-                if (!s.tarih) return false;
-                try {
-                    const siparisTarihi = new Date(s.tarih);
-                    return siparisTarihi >= baslangicZamani;
-                } catch (e) {
-                    return false;
-                }
-            });
             
             let tumUrunler = [];
             
-            filtrelenmisSiparisler.forEach(siparis => {
+            masaSiparisleri.forEach(siparis => {
                 if (siparis.urunler && siparis.urunler.length > 0) {
                     siparis.urunler.forEach(u => {
                         tumUrunler.push(u.urun || u.isim || 'Ürün');
@@ -738,34 +704,15 @@
                 });
         }
 
-        // Masa hesabını göster (SADECE SON SIFIRLAMADAN SONRAKİ SİPARİŞLER)
+        // Masa hesabını göster - DÜZELTİLDİ
         window.masaHesabiGoster = function(masaNo) {
             aktifMasa = masaNo;
-            
-            // Son sıfırlama zamanını al (yoksa masanın dolduğu an)
-            let baslangicZamani;
-            if (masaDurumlari[masaNo]?.sonSifirlama) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].sonSifirlama);
-            } else {
-                baslangicZamani = masaDurumlari[masaNo]?.baslangic ? new Date(masaDurumlari[masaNo].baslangic) : new Date(0);
-            }
             
             // Bu masaya ait TÜM siparişleri al
             const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             
-            // Sadece baslangicZamani'ndan SONRAKİ siparişleri filtrele
-            const filtrelenmisSiparisler = masaSiparisleri.filter(s => {
-                if (!s.tarih) return false;
-                try {
-                    const siparisTarihi = new Date(s.tarih);
-                    return siparisTarihi >= baslangicZamani;
-                } catch (e) {
-                    return false;
-                }
-            });
-            
-            if (filtrelenmisSiparisler.length === 0) {
-                alert(`Masa ${masaNo} için son sıfırlamadan sonra sipariş yok.`);
+            if (masaSiparisleri.length === 0) {
+                alert(`Masa ${masaNo} için sipariş yok.`);
                 return;
             }
             
@@ -775,7 +722,7 @@
             let toplam = 0;
             let siparisNo = 1;
             
-            filtrelenmisSiparisler.forEach(siparis => {
+            masaSiparisleri.forEach(siparis => {
                 if (siparis.urunler && siparis.urunler.length > 0) {
                     urunlerHtml += `<div style="margin-top: 10px; font-weight: bold; color: #d2691e;">Sipariş #${siparisNo}</div>`;
                     
