@@ -591,33 +591,15 @@
         let aktifMasa = null;
         let masaDurumlari = {};
 
-        // Masa toplamını hesapla (SADECE SON SIFIRLAMADAN SONRAKİ SİPARİŞLER)
+        // Masa toplamını hesapla (SADECE BU MASANIN TÜM SİPARİŞLERİ)
         function masaToplaminiHesapla(masaNo) {
-            // Eğer masa boşsa 0 döndür
+            // Masa durumunu kontrol et - dolu mu?
             if (!masaDurumlari[masaNo] || masaDurumlari[masaNo].durum !== 'dolu') {
                 return 0;
             }
             
-            // Son sıfırlama zamanını al (YOKSA MASANIN İLK DOLDUĞU AN)
-            let baslangicZamani;
-            if (masaDurumlari[masaNo].sonSifirlama) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].sonSifirlama);
-            } else if (masaDurumlari[masaNo].baslangic) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].baslangic);
-            } else {
-                baslangicZamani = new Date(0);
-            }
-            
-            const masaSiparisleri = tumSiparisler.filter(s => {
-                if (s.masa != masaNo) return false;
-                if (!s.tarih) return false;
-                try {
-                    const siparisTarihi = new Date(s.tarih);
-                    return siparisTarihi >= baslangicZamani;
-                } catch (e) {
-                    return false;
-                }
-            });
+            // Bu masaya ait TÜM siparişleri al (zaman filtresi YOK)
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             
             let toplam = 0;
             
@@ -634,33 +616,15 @@
             return toplam;
         }
 
-        // Masa ürün özetini hesapla (SADECE SON SIFIRLAMADAN SONRAKİ SİPARİŞLER)
+        // Masa ürün özetini hesapla (SADECE BU MASANIN TÜM SİPARİŞLERİ)
         function masaUrunOzetiniHesapla(masaNo) {
-            // Eğer masa boşsa boş döndür
+            // Masa durumunu kontrol et - dolu mu?
             if (!masaDurumlari[masaNo] || masaDurumlari[masaNo].durum !== 'dolu') {
                 return '';
             }
             
-            // Son sıfırlama zamanını al (YOKSA MASANIN İLK DOLDUĞU AN)
-            let baslangicZamani;
-            if (masaDurumlari[masaNo].sonSifirlama) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].sonSifirlama);
-            } else if (masaDurumlari[masaNo].baslangic) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].baslangic);
-            } else {
-                baslangicZamani = new Date(0);
-            }
-            
-            const masaSiparisleri = tumSiparisler.filter(s => {
-                if (s.masa != masaNo) return false;
-                if (!s.tarih) return false;
-                try {
-                    const siparisTarihi = new Date(s.tarih);
-                    return siparisTarihi >= baslangicZamani;
-                } catch (e) {
-                    return false;
-                }
-            });
+            // Bu masaya ait TÜM siparişleri al (zaman filtresi YOK)
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             
             let tumUrunler = [];
             
@@ -734,33 +698,15 @@
                 });
         }
 
-        // Masa hesabını göster (SADECE SON SIFIRLAMADAN SONRAKİ SİPARİŞLER)
+        // Masa hesabını göster (TÜM SİPARİŞLER)
         window.masaHesabiGoster = function(masaNo) {
             aktifMasa = masaNo;
             
-            // Son sıfırlama zamanını al (YOKSA MASANIN İLK DOLDUĞU AN)
-            let baslangicZamani;
-            if (masaDurumlari[masaNo]?.sonSifirlama) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].sonSifirlama);
-            } else if (masaDurumlari[masaNo]?.baslangic) {
-                baslangicZamani = new Date(masaDurumlari[masaNo].baslangic);
-            } else {
-                baslangicZamani = new Date(0);
-            }
-            
-            const masaSiparisleri = tumSiparisler.filter(s => {
-                if (s.masa != masaNo) return false;
-                if (!s.tarih) return false;
-                try {
-                    const siparisTarihi = new Date(s.tarih);
-                    return siparisTarihi >= baslangicZamani;
-                } catch (e) {
-                    return false;
-                }
-            });
+            // Bu masaya ait TÜM siparişleri al
+            const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             
             if (masaSiparisleri.length === 0) {
-                alert(`Masa ${masaNo} için son sıfırlamadan sonra sipariş yok.`);
+                alert(`Masa ${masaNo} için sipariş yok.`);
                 return;
             }
             
