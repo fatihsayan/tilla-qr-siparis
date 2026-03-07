@@ -591,8 +591,13 @@
         let aktifMasa = null;
         let masaDurumlari = {};
 
-        // Masa toplamını hesapla
+        // Masa toplamını hesapla (SADECE AKTİF MASALAR İÇİN)
         function masaToplaminiHesapla(masaNo) {
+            // Eğer masa boşsa veya masaDurumlari'nda dolu değilse 0 döndür
+            if (!masaDurumlari[masaNo] || masaDurumlari[masaNo].durum !== 'dolu') {
+                return 0;
+            }
+            
             const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             let toplam = 0;
             
@@ -609,8 +614,13 @@
             return toplam;
         }
 
-        // Masa ürün özetini hesapla
+        // Masa ürün özetini hesapla (SADECE AKTİF MASALAR İÇİN)
         function masaUrunOzetiniHesapla(masaNo) {
+            // Eğer masa boşsa veya masaDurumlari'nda dolu değilse boş döndür
+            if (!masaDurumlari[masaNo] || masaDurumlari[masaNo].durum !== 'dolu') {
+                return '';
+            }
+            
             const masaSiparisleri = tumSiparisler.filter(s => s.masa == masaNo);
             let tumUrunler = [];
             
