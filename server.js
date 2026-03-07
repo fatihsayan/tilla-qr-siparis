@@ -123,18 +123,18 @@ app.get('/hesap-istekleri', (req, res) => {
     }
 });
 
-// Masa durumları
+// Masa durumları (sonSifirlama eklendi)
 let masaDurumlari = {
-    1: { durum: 'bos', baslangic: null, sure: 0 },
-    2: { durum: 'bos', baslangic: null, sure: 0 },
-    3: { durum: 'bos', baslangic: null, sure: 0 },
-    4: { durum: 'bos', baslangic: null, sure: 0 },
-    5: { durum: 'bos', baslangic: null, sure: 0 },
-    6: { durum: 'bos', baslangic: null, sure: 0 },
-    7: { durum: 'bos', baslangic: null, sure: 0 },
-    8: { durum: 'bos', baslangic: null, sure: 0 },
-    9: { durum: 'bos', baslangic: null, sure: 0 },
-    10: { durum: 'bos', baslangic: null, sure: 0 }
+    1: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    2: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    3: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    4: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    5: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    6: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    7: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    8: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    9: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null },
+    10: { durum: 'bos', baslangic: null, sure: 0, sonSifirlama: null }
 };
 
 // Masa durumlarını getir
@@ -151,19 +151,19 @@ app.get('/masa-durumlari', (req, res) => {
     res.json(masaDurumlari);
 });
 
-// Masa sıfırla (SADECE DURUM, SİPARİŞLER KALIR)
+// Masa sıfırla (sonSifirlama zamanını kaydeder)
 app.post('/masa-sifirla', (req, res) => {
     const { masaNo } = req.body;
     
     try {
-        // SADECE MASA DURUMUNU GÜNCELLE, SİPARİŞLERİ SİLME!
         if (masaDurumlari[masaNo]) {
             masaDurumlari[masaNo].durum = 'bos';
             masaDurumlari[masaNo].baslangic = null;
             masaDurumlari[masaNo].sure = 0;
+            masaDurumlari[masaNo].sonSifirlama = new Date().toISOString(); // SIFIRLAMA ZAMANI KAYDEDİLİR
         }
         
-        console.log(`Masa ${masaNo} durumu sıfırlandı (siparişler korundu).`);
+        console.log(`Masa ${masaNo} sıfırlandı (sonSifirlama: ${masaDurumlari[masaNo].sonSifirlama})`);
         res.json({ basarili: true });
     } catch (e) {
         console.error('Sıfırlama hatası:', e);
